@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../widgets/BottomNavBar.dart';
 import '../utils/PageTransition.dart';
+import '../screens/DietaryPreferencesScreen.dart';
+import '../screens/HealthFitnessGoalsScreen.dart';
+import '../screens/AppPreferencesScreen.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -33,29 +36,29 @@ class SettingsPage extends StatelessWidget {
           children: [
             _settingsCard(
               context,
-              title: 'Dietary Restrictions',
-              subtitle: 'Allergies, dietary preferences, and restrictions',
+              title: 'Dietary Preferences',
+              subtitle: 'Allergies, diet types, and ingredient restrictions',
               icon: Icons.shield_outlined,
               color: const Color(0xFF00C853),
-              destination: null, 
+              destination: const DietaryPreferencesScreen(),
             ),
             const SizedBox(height: 15),
             _settingsCard(
               context,
-              title: 'Fitness Goals',
-              subtitle: 'Weight goals and activity targets',
+              title: 'Health and Fitness Goals',
+              subtitle: 'Calorie targets, weight goals, and activity level',
               icon: Icons.fitness_center_outlined,
               color: const Color(0xFF2979FF),
-              destination: null, 
+              destination: const HealthFitnessGoalsScreen(),
             ),
             const SizedBox(height: 15),
             _settingsCard(
               context,
-              title: 'Personal Settings',
-              subtitle: 'Units, notifications, and preferences',
+              title: 'App Preferences',
+              subtitle: 'Units, notifications, and AI assistant mode',
               icon: Icons.settings_outlined,
               color: const Color(0xFFFF6D00),
-              destination: null, 
+              destination: const AppPreferencesScreen(),
             ),
           ],
         ),

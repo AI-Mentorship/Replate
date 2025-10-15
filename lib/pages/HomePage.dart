@@ -5,8 +5,9 @@ import 'SettingsPage.dart';
 import '../widgets/BottomNavBar.dart';
 import '../utils/PageTransition.dart';
 import '../data/CalorieData.dart';
-import '../screens/ProfilePage.dart';
+import '../pages/ProfilePage.dart';
 import '../screens/CookingAssistantScreen.dart';
+import '../screens/GroceryListScreen.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -82,11 +83,22 @@ class HomePage extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          _mealCard(
-                            title: "Expiring Soon",
-                            subtitle: "8 items",
-                            imageUrl:
-                                "https://upload.wikimedia.org/wikipedia/commons/6/68/Vegetable_display_-_West_Croydon_fruit_market.jpg",
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                createRoute(
+                                  const GroceryListScreen(),
+                                  fromRight: true,
+                                ),
+                              );
+                            },
+                            child: _mealCard(
+                              title: "Grocery List",
+                              subtitle: "View or generate items",
+                              imageUrl:
+                                  "https://images.unsplash.com/photo-1601050690597-02fae3f165a5?auto=format&fit=crop&w=400&q=80",
+                            ),
                           ),
                           const SizedBox(
                             width: 20,
@@ -367,8 +379,8 @@ class HomePage extends StatelessWidget {
         );
       },
       child: Container(
-        width: 160, 
-        height: 180, 
+        width: 160,
+        height: 180,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
           color: Colors.white,
@@ -383,7 +395,7 @@ class HomePage extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              height: 100, 
+              height: 100,
               width: double.infinity,
               decoration: BoxDecoration(
                 color: const Color(0xFFFFE6DC),

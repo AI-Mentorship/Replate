@@ -105,7 +105,7 @@ class ProfilePage extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
 
-                      // Grid (fits on one screen)
+                      // Grid 
                       Expanded(
                         child: GridView.count(
                           physics: const NeverScrollableScrollPhysics(),

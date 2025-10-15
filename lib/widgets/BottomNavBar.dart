@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../screens/ProfilePage.dart';
+import '../pages/ProfilePage.dart';
 import '../utils/PageTransition.dart';
 import '../pages/HomePage.dart';
 import '../pages/PantryPage.dart';

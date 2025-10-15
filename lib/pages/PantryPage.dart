@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../pages/HomePage.dart';
 import '../widgets/BottomNavBar.dart';
+import '../screens/GroceryListScreen.dart';
 
 class PantryPage extends StatelessWidget {
   const PantryPage({super.key});
@@ -103,7 +104,12 @@ class PantryPage extends StatelessWidget {
                           // Cart button
                           GestureDetector(
                             onTap: () {
-                              // will open grocery list page later
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const GroceryListScreen(),
+                                ),
+                              );
                             },
                             child: const Icon(
                               Icons.shopping_cart_outlined,
