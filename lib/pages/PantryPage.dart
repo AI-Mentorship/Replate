@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../pages/HomePage.dart';
 import '../widgets/BottomNavBar.dart';
 import '../screens/GroceryListScreen.dart';
+import 'package:replate/utils/CameraHelper.dart';
 
 class PantryPage extends StatelessWidget {
   const PantryPage({super.key});
@@ -87,8 +88,24 @@ class PantryPage extends StatelessWidget {
                           const SizedBox(width: 10),
                           // Camera (+) button
                           GestureDetector(
-                            onTap: () {
-                              // will open camera later
+                            onTap: () async {
+                              final image =
+                                  await CameraHelper.pickImageFromCamera();
+
+                              if (image != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Ingredient photo captured!'),
+                                  ),
+                                );
+                                print('Captured image: ${image.path}');
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('No image captured'),
+                                  ),
+                                );
+                              }
                             },
                             child: Container(
                               width: 40,

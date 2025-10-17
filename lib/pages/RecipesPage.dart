@@ -49,23 +49,21 @@ class _RecipesPageState extends State<RecipesPage> {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 25,
+                    vertical: 25,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       // Tabs
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildTabButton("Discover"),
-                            const SizedBox(width: 1),
-                            _buildTabButton("Saved"),
-                            const SizedBox(width: 1),
-                            _buildTabButton("Upload"),
-                          ],
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildTabButton("Discover"),
+                          _buildTabButton("Saved"),
+                          _buildTabButton("Upload"),
+                        ],
                       ),
 
                       const SizedBox(height: 20),
@@ -89,27 +87,30 @@ class _RecipesPageState extends State<RecipesPage> {
 
   // Tabs UI
   Widget _buildTabButton(String label) {
-    final bool isSelected = selectedTab == label;
-    return GestureDetector(
-      onTap: () => setState(() => selectedTab = label),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFE95322) : const Color(0xFFFFE6DC),
-          borderRadius: BorderRadius.circular(25),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : const Color(0xFF391713),
-            fontFamily: 'League Spartan',
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-          ),
+  final bool isSelected = selectedTab == label;
+  final screenWidth = MediaQuery.of(context).size.width;
+  return GestureDetector(
+    onTap: () => setState(() => selectedTab = label),
+    child: Container(
+      width: screenWidth / 3.5, 
+      padding: EdgeInsets.symmetric(vertical: screenWidth * 0.025),
+      decoration: BoxDecoration(
+        color: isSelected ? const Color(0xFFE95322) : const Color(0xFFFFE6DC),
+        borderRadius: BorderRadius.circular(25),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? Colors.white : const Color(0xFF391713),
+          fontFamily: 'League Spartan',
+          fontWeight: FontWeight.w600,
+          fontSize: screenWidth * 0.04,
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   // Handles what shows for each tab
   Widget _buildTabContent() {
@@ -142,7 +143,8 @@ class _RecipesPageState extends State<RecipesPage> {
       return ListView(
         children: [
           _RecipeItem(
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/39/Chicken_Curry.jpg',
+            imageUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/3/39/Chicken_Curry.jpg',
             title: 'Chicken Curry',
             details: '500 Cal · 30 Min',
             steps: const [
@@ -154,7 +156,8 @@ class _RecipesPageState extends State<RecipesPage> {
             ],
           ),
           _RecipeItem(
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/57/Veggie_burger_%281%29.jpg',
+            imageUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/5/57/Veggie_burger_%281%29.jpg',
             title: 'Bean and Vegetable Burger',
             details: '470 Cal · 20 Min',
             steps: const [
@@ -165,7 +168,8 @@ class _RecipesPageState extends State<RecipesPage> {
             ],
           ),
           _RecipeItem(
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/45/Coffee_Latte.jpg',
+            imageUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/4/45/Coffee_Latte.jpg',
             title: 'Coffee Latte',
             details: '170 Cal · 10 Min',
             steps: const [
@@ -177,7 +181,8 @@ class _RecipesPageState extends State<RecipesPage> {
             ],
           ),
           _RecipeItem(
-            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/02/Strawberry_cheesecake.jpg',
+            imageUrl:
+                'https://upload.wikimedia.org/wikipedia/commons/0/02/Strawberry_cheesecake.jpg',
             title: 'Strawberry Cheesecake',
             details: '150 Cal · 30 Min',
             steps: const [
@@ -218,10 +223,8 @@ class _RecipeItem extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => CookingAssistantScreen(
-                  recipeTitle: title,
-                  steps: steps,
-                ),
+                builder: (_) =>
+                    CookingAssistantScreen(recipeTitle: title, steps: steps),
               ),
             );
           },
@@ -238,7 +241,10 @@ class _RecipeItem extends StatelessWidget {
                   height: 60,
                   color: Colors.grey[300],
                   alignment: Alignment.center,
-                  child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                  child: const Icon(
+                    Icons.image_not_supported,
+                    color: Colors.grey,
+                  ),
                 );
               },
             ),

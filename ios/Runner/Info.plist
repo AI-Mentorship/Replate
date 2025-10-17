@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app uses your camera to scan your fridge and pantry for ingredients.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs photo access to display your scanned images.</string>
 </dict>
 </plist>

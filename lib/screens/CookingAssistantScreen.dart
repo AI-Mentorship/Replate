@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/CameraHelper.dart';
 import 'FullRecipeScreen.dart';
 
 class CookingAssistantScreen extends StatefulWidget {
@@ -27,15 +28,11 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
   }
 
   void _next() {
-    if (_index < widget.steps.length - 1) {
-      setState(() => _index++);
-    }
+    if (_index < widget.steps.length - 1) setState(() => _index++);
   }
 
   void _back() {
-    if (_index > 0) {
-      setState(() => _index--);
-    }
+    if (_index > 0) setState(() => _index--);
   }
 
   void _repeat() {
@@ -63,11 +60,11 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
     );
   }
 
-  void _camera() {
+  Future<void> _camera() async {
+    final image = await CameraHelper.pickImageFromCamera();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Camera will open here (coming soon)'),
-        behavior: SnackBarBehavior.floating,
+      SnackBar(
+        content: Text(image != null ? "Photo captured successfully!" : "No photo captured."),
       ),
     );
   }
@@ -114,10 +111,7 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: Color(0xFFE95322),
-                        ),
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFE95322)),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
@@ -154,55 +148,78 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
             // Action Buttons
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _roundAction(
-                    icon: Icons.chat_bubble_outline,
-                    label: 'Help',
-                    onTap: _help,
-                  ),
-                  _roundAction(
-                    icon: Icons.camera_alt_outlined,
-                    label: 'Camera',
-                    onTap: _camera,
-                  ),
-                  _roundAction(
-                    icon: Icons.assignment_outlined,
-                    label: 'Full Recipe',
-                    onTap: _fullRecipe,
-                  ),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final gap = 12.0;
+                  final buttonWidth = (constraints.maxWidth - 2 * gap) / 3;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: buttonWidth,
+                        child: _roundAction(
+                          icon: Icons.chat_bubble_outline,
+                          label: 'Help',
+                          onTap: _help,
+                        ),
+                      ),
+                      SizedBox(
+                        width: buttonWidth,
+                        child: _roundAction(
+                          icon: Icons.camera_alt_outlined,
+                          label: 'Camera',
+                          onTap: _camera,
+                        ),
+                      ),
+                      SizedBox(
+                        width: buttonWidth,
+                        child: _roundAction(
+                          icon: Icons.assignment_outlined,
+                          label: 'Full Recipe',
+                          onTap: _fullRecipe,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
 
             // Navigation Buttons
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 6, 22, 22),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _pillButton(
-                      label: 'Back',
-                      onPressed: _index > 0 ? _back : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _pillButton(
-                      label: 'Repeat',
-                      filled: true,
-                      onPressed: _repeat,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _pillButton(
-                      label: 'Next',
-                      onPressed: _index < total - 1 ? _next : null,
-                    ),
-                  ),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final gap = 12.0;
+                  final buttonWidth = (constraints.maxWidth - 2 * gap) / 3;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: buttonWidth,
+                        child: _pillButton(
+                          label: 'Back',
+                          onPressed: _index > 0 ? _back : null,
+                        ),
+                      ),
+                      SizedBox(
+                        width: buttonWidth,
+                        child: _pillButton(
+                          label: 'Repeat',
+                          filled: true,
+                          onPressed: _repeat,
+                        ),
+                      ),
+                      SizedBox(
+                        width: buttonWidth,
+                        child: _pillButton(
+                          label: 'Next',
+                          onPressed: _index < total - 1 ? _next : null,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -212,13 +229,13 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
   }
 
   // --- UI Helpers ---
-
   Widget _roundAction({
     required IconData icon,
     required String label,
     required VoidCallback onTap,
   }) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         InkResponse(
           onTap: onTap,
@@ -230,11 +247,7 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
               color: Colors.white,
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(
-                  color: Color(0x22000000),
-                  blurRadius: 6,
-                  offset: Offset(0, 3),
-                ),
+                BoxShadow(color: Color(0x22000000), blurRadius: 6, offset: Offset(0, 3)),
               ],
             ),
             child: Icon(icon, color: const Color(0xFFE95322)),
@@ -261,16 +274,15 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
     final bg = filled ? const Color(0xFFE95322) : Colors.white;
     final fg = filled ? Colors.white : const Color(0xFF391713);
     return SizedBox(
-      height: 44,
+      height: 48,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           elevation: filled ? 2 : 0,
           backgroundColor: onPressed == null ? bg.withOpacity(0.5) : bg,
           foregroundColor: fg,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         ),
         child: Text(
           label,
