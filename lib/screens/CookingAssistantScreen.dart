@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:flutter_tts/flutter_tts.dart';
 import '../utils/CameraHelper.dart';
 import 'FullRecipeScreen.dart';
+import 'ChatbotScreen.dart';
 
 class CookingAssistantScreen extends StatefulWidget {
   final String recipeTitle;
@@ -20,19 +23,36 @@ class CookingAssistantScreen extends StatefulWidget {
 
 class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
   late int _index;
+  late stt.SpeechToText _speech;
+  late FlutterTts _tts;
+  bool _isListening = false;
 
   @override
   void initState() {
     super.initState();
     _index = widget.initialIndex.clamp(0, widget.steps.length - 1);
+    _speech = stt.SpeechToText();
+    _tts = FlutterTts();
+    _speakCurrentStep();
+  }
+
+  Future<void> _speakCurrentStep() async {
+    await _tts.stop();
+    await _tts.speak(widget.steps[_index]);
   }
 
   void _next() {
-    if (_index < widget.steps.length - 1) setState(() => _index++);
+    if (_index < widget.steps.length - 1) {
+      setState(() => _index++);
+      _speakCurrentStep();
+    }
   }
 
   void _back() {
-    if (_index > 0) setState(() => _index--);
+    if (_index > 0) {
+      setState(() => _index--);
+      _speakCurrentStep();
+    }
   }
 
   void _repeat() {
@@ -43,19 +63,17 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
         duration: const Duration(milliseconds: 800),
       ),
     );
+    _speakCurrentStep();
   }
 
-  void _help() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Help'),
-        content: const Text(
-          'This will explain the current step in more detail (video, tips, or safety notes).',
+  void _openChatbot() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatbotScreen(
+          recipeTitle: widget.recipeTitle,
+          currentStep: widget.steps[_index],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK')),
-        ],
       ),
     );
   }
@@ -81,6 +99,30 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
     );
   }
 
+  void _listenVoice() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize();
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(onResult: (val) {
+          if (val.finalResult) {
+            final cmd = val.recognizedWords.toLowerCase();
+            if (cmd.contains('next')) _next();
+            else if (cmd.contains('back')) _back();
+            else if (cmd.contains('repeat')) _repeat();
+            else if (cmd.contains('help')) _openChatbot();
+            else if (cmd.contains('full')) _fullRecipe();
+            setState(() => _isListening = false);
+            _speech.stop();
+          }
+        });
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final total = widget.steps.length;
@@ -91,32 +133,39 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
+            // Header Row (Back Arrow, Step Text, Mic)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              child: SizedBox(
-                height: 52,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Text(
-                      'Step ${_index + 1} of $total',
-                      style: const TextStyle(
-                        color: Color(0xFF1D1D1D),
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        fontFamily: 'League Spartan',
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFE95322)),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        'Step ${_index + 1} of $total',
+                        style: const TextStyle(
+                          color: Color(0xFF1D1D1D),
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          fontFamily: 'League Spartan',
+                        ),
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFE95322)),
-                        onPressed: () => Navigator.pop(context),
-                      ),
+                  ),
+                  FloatingActionButton(
+                    backgroundColor: const Color(0xFFE95322),
+                    mini: true,
+                    onPressed: _listenVoice,
+                    child: Icon(
+                      _isListening ? Icons.mic_off_rounded : Icons.mic_rounded,
+                      color: Colors.white,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 
@@ -160,7 +209,7 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
                         child: _roundAction(
                           icon: Icons.chat_bubble_outline,
                           label: 'Help',
-                          onTap: _help,
+                          onTap: _openChatbot,
                         ),
                       ),
                       SizedBox(
@@ -228,7 +277,7 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
     );
   }
 
-  // --- UI Helpers ---
+  // UI Helpers
   Widget _roundAction({
     required IconData icon,
     required String label,

@@ -8,7 +8,7 @@ import '../data/CalorieData.dart';
 import '../pages/ProfilePage.dart';
 import '../screens/CookingAssistantScreen.dart';
 import '../screens/GroceryListScreen.dart';
-import '../utils/CameraHelper.dart'; 
+import '../utils/CameraHelper.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -21,43 +21,43 @@ class HomePage extends StatelessWidget {
       backgroundColor: const Color(0xFFE0B03A),
       drawer: _buildSideMenu(context),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        "Hi, <Name> 👋",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: screenWidth * 0.08,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'League Spartan',
-                        ),
-                        overflow: TextOverflow.ellipsis,
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      "Hi, <Name> 👋",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: screenWidth * 0.08,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'League Spartan',
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    Builder(
-                      builder: (context) => IconButton(
-                        icon: Icon(
-                          Icons.menu,
-                          color: Colors.white,
-                          size: screenWidth * 0.08,
-                        ),
-                        onPressed: () => Scaffold.of(context).openDrawer(),
+                  ),
+                  Builder(
+                    builder: (context) => IconButton(
+                      icon: Icon(
+                        Icons.menu,
+                        color: Colors.white,
+                        size: screenWidth * 0.08,
                       ),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
-              // White Section
-              Container(
+            // Expanded White Section
+            Expanded(
+              child: Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: Color(0xFFF5F5F5),
@@ -66,7 +66,7 @@ class HomePage extends StatelessWidget {
                     topRight: Radius.circular(35),
                   ),
                 ),
-                child: Padding(
+                child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +117,7 @@ class HomePage extends StatelessWidget {
                       ),
                       const SizedBox(height: 25),
 
-                      // --- Scan Fridge Button ---
+                      // Scan Fridge Button
                       Center(
                         child: SizedBox(
                           width: screenWidth * 0.75,
@@ -156,7 +156,7 @@ class HomePage extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 25),
-                      // --- Quick Recipes ---
+                      // Quick Recipes 
                       Text(
                         "Quick Recipes",
                         style: TextStyle(
@@ -231,8 +231,8 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: const BottomNavBar(selectedIndex: 0),
@@ -304,7 +304,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  //Grocery List Card 
+  // Grocery List Card
   static Widget _mealCard({
     required String title,
     required String subtitle,
@@ -371,7 +371,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  //Calorie Card
+  // Calorie Card
   static Widget _calorieCard(BuildContext context, double width, double height) {
     return GestureDetector(
       onTap: () => Navigator.push(context, createRoute(const ProfilePage(), fromRight: true)),
@@ -454,7 +454,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  //Recipe Card
+  // Recipe Card
   static Widget _recipeCard(
     BuildContext context, {
     required String title,
