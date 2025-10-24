@@ -28,12 +28,19 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
   bool _isListening = false;
 
   @override
+void dispose() {
+  _tts.stop();
+  _speech.stop();
+  super.dispose();
+}
+
+  @override
   void initState() {
     super.initState();
     _index = widget.initialIndex.clamp(0, widget.steps.length - 1);
     _speech = stt.SpeechToText();
     _tts = FlutterTts();
-    _speakCurrentStep();
+    Future.delayed(const Duration(seconds: 1), _speakCurrentStep);
   }
 
   Future<void> _speakCurrentStep() async {
@@ -66,7 +73,8 @@ class _CookingAssistantScreenState extends State<CookingAssistantScreen> {
     _speakCurrentStep();
   }
 
-  void _openChatbot() {
+  Future<void> _openChatbot() async {
+    await _tts.stop(); 
     Navigator.push(
       context,
       MaterialPageRoute(

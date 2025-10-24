@@ -8,8 +8,6 @@ class AppPreferencesScreen extends StatefulWidget {
 }
 
 class _AppPreferencesScreenState extends State<AppPreferencesScreen> {
-  bool darkMode = false;
-  bool notifications = true;
   String units = 'Metric';
   String assistantMode = 'Voice-Guided';
 
@@ -37,19 +35,6 @@ class _AppPreferencesScreenState extends State<AppPreferencesScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          SwitchListTile(
-            title: const Text('Dark Mode'),
-            value: darkMode,
-            activeColor: const Color(0xFFE95322),
-            onChanged: (val) => setState(() => darkMode = val),
-          ),
-          SwitchListTile(
-            title: const Text('Enable Notifications'),
-            value: notifications,
-            activeColor: const Color(0xFFE95322),
-            onChanged: (val) => setState(() => notifications = val),
-          ),
-          const SizedBox(height: 15),
           const Text(
             'Measurement Units:',
             style: TextStyle(

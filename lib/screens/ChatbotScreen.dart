@@ -24,25 +24,57 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final FlutterTts _tts = FlutterTts();
 
   bool _isListening = false;
+  
+  @override
+void dispose() {
+  _tts.stop(); // stop any ongoing speech
+  _speech.stop(); // stop mic if still listening
+  super.dispose();
+}
 
-  void _sendMessage(String text) {
-    if (text.trim().isEmpty) return;
-    setState(() {
-      _messages.add({'sender': 'user', 'text': text});
-    });
-    _controller.clear();
 
-    // HARDCODED AI response (replace with backend call)
-    Future.delayed(const Duration(milliseconds: 600), () {
-      final response =
-          "Try simmering it for 5 more minutes or add 1 tsp cornstarch mixed with water.";
-      setState(() {
-        _messages.add({'sender': 'bot', 'text': response});
-      });
-      _tts.speak(response); // speak AI to reply out loud
-    });
+  // MOCK CHATBOT REPLY 
+  Future<String> _mockChatbotReply(String text) async {
+    await Future.delayed(const Duration(seconds: 1)); // simulate API delay
+    final lower = text.toLowerCase();
+
+    if (lower.contains("substitute") || lower.contains("instead")) {
+      return "You can try olive oil instead of butter!";
+    } else if (lower.contains("cook")) {
+      return "Try cooking it for a bit longer until it thickens.";
+    } else if (lower.contains("salt")) {
+      return "You can reduce salt by adding a splash of lemon juice to balance flavor.";
+    }
+
+    return "I'm here to help with your ${widget.recipeTitle}. You're currently on step: ${widget.currentStep}.";
   }
 
+  // MOCK IMAGE UPLOAD 
+  Future<String> _mockUploadImage(String imagePath) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return "https://fake-supabase-storage.com/${DateTime.now().millisecondsSinceEpoch}.jpg";
+  }
+
+  // SEND MESSAGE FUNCTION 
+  Future<void> _sendMessage(String text) async {
+    if (text.trim().isEmpty) return;
+    setState(() => _messages.add({'sender': 'user', 'text': text}));
+    _controller.clear();
+
+    // Show "Thinking..." placeholder
+    setState(() => _messages.add({'sender': 'bot', 'text': '🤔 Thinking...'}));
+
+    // Mock AI reply
+    final reply = await _mockChatbotReply(text);
+
+    setState(() {
+      _messages.removeLast(); // remove placeholder
+      _messages.add({'sender': 'bot', 'text': reply});
+    });
+    _tts.speak(reply);
+  }
+
+  // VOICE INPUT FUNCTION
   void _listen() async {
     if (!_isListening) {
       bool available = await _speech.initialize();
@@ -61,13 +93,20 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     }
   }
 
+  // CAMERA FUNCTION (MOCK UPLOAD)
   Future<void> _camera() async {
     final image = await CameraHelper.pickImageFromCamera();
     if (image != null) {
       setState(() {
-        _messages.add({'sender': 'user', 'text': '[📸 Sent image to analyze]'});
+        _messages.add({'sender': 'user', 'text': '[📸 Capturing image...]'});
       });
-      // TODO: send image to backend for visual analysis
+
+      final imageUrl = await _mockUploadImage(image.path);
+
+      setState(() {
+        _messages.add({'sender': 'user', 'text': '[📸 Uploaded image: $imageUrl]'});
+      });
+      // Later, send imageUrl to backend chatbot once endpoint is ready
     }
   }
 
@@ -82,9 +121,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         title: const Text(
           "AI Cooking Assistant",
           style: TextStyle(
-              fontFamily: 'League Spartan',
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF391713)),
+            fontFamily: 'League Spartan',
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF391713),
+          ),
         ),
       ),
       body: Column(
@@ -97,12 +137,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 final msg = _messages[i];
                 final isUser = msg['sender'] == 'user';
                 return Align(
-                  alignment:
-                      isUser ? Alignment.centerRight : Alignment.centerLeft,
+                  alignment: isUser
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 6),
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 14),
                     decoration: BoxDecoration(
                       color: isUser
                           ? const Color(0xFFE95322)
@@ -124,14 +165,17 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.mic,
-                      color: _isListening
-                          ? const Color(0xFFE95322)
-                          : const Color(0xFF391713)),
+                  icon: Icon(
+                    Icons.mic,
+                    color: _isListening
+                        ? const Color(0xFFE95322)
+                        : const Color(0xFF391713),
+                  ),
                   onPressed: _listen,
                 ),
                 Expanded(
@@ -154,8 +198,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                   onPressed: () => _sendMessage(_controller.text),
                 ),
                 IconButton(
-                  icon:
-                      const Icon(Icons.camera_alt, color: Color(0xFF391713)),
+                  icon: const Icon(Icons.camera_alt,
+                      color: Color(0xFF391713)),
                   onPressed: _camera,
                 ),
               ],

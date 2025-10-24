@@ -6,7 +6,7 @@ import '../widgets/BottomNavBar.dart';
 import '../utils/PageTransition.dart';
 import '../data/CalorieData.dart';
 import '../pages/ProfilePage.dart';
-import '../screens/CookingAssistantScreen.dart';
+import '../screens/RecipeOverviewScreen.dart';
 import '../screens/GroceryListScreen.dart';
 import '../utils/CameraHelper.dart';
 
@@ -156,7 +156,7 @@ class HomePage extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 25),
-                      // Quick Recipes 
+                      // Quick Recipes
                       Text(
                         "Quick Recipes",
                         style: TextStyle(
@@ -181,12 +181,27 @@ class HomePage extends StatelessWidget {
                               rating: "4.7",
                               imageUrl:
                                   "https://upload.wikimedia.org/wikipedia/commons/b/bc/Spaghetti_aglio_e_olio_%28homemade%29.jpg",
+                              ingredients: const [
+                                "Spaghetti",
+                                "Olive Oil",
+                                "Garlic",
+                                "Salt",
+                                "Parsley",
+                                "Parmesan"
+                              ],
                               steps: const [
                                 "Boil spaghetti until al dente.",
                                 "Heat olive oil and garlic in a pan.",
                                 "Toss pasta with oil, salt, and parsley.",
                                 "Top with parmesan and serve hot.",
                               ],
+                              nutrition: const {
+                                "Calories": "420 kcal",
+                                "Protein": "12g",
+                                "Fat": "14g",
+                                "Carbs": "65g"
+                              },
+                              time: "15 mins",
                               cardWidth: screenWidth * 0.45,
                               cardHeight: screenHeight * 0.22,
                             ),
@@ -198,12 +213,26 @@ class HomePage extends StatelessWidget {
                               rating: "4.5",
                               imageUrl:
                                   "https://upload.wikimedia.org/wikipedia/commons/f/f3/Spaghetti_alla_Carbonara_%28cropped%29.jpg",
+                              ingredients: const [
+                                "Spaghetti",
+                                "Eggs",
+                                "Parmesan",
+                                "Pancetta",
+                                "Black Pepper"
+                              ],
                               steps: const [
                                 "Cook spaghetti until al dente.",
                                 "Fry pancetta until crisp.",
                                 "Mix eggs with parmesan and pepper.",
                                 "Combine all and serve immediately.",
                               ],
+                              nutrition: const {
+                                "Calories": "480 kcal",
+                                "Protein": "18g",
+                                "Fat": "20g",
+                                "Carbs": "55g"
+                              },
+                              time: "20 mins",
                               cardWidth: screenWidth * 0.45,
                               cardHeight: screenHeight * 0.22,
                             ),
@@ -215,12 +244,27 @@ class HomePage extends StatelessWidget {
                               rating: "4.8",
                               imageUrl:
                                   "https://upload.wikimedia.org/wikipedia/commons/4/4d/Avocado_toast_with_egg.jpg",
+                              ingredients: const [
+                                "Bread",
+                                "Avocado",
+                                "Salt",
+                                "Lemon Juice",
+                                "Egg",
+                                "Olive Oil"
+                              ],
                               steps: const [
                                 "Toast the bread to your liking.",
                                 "Mash ripe avocado with salt and lemon.",
                                 "Spread on toast, top with egg or chili flakes.",
                                 "Drizzle olive oil and enjoy.",
                               ],
+                              nutrition: const {
+                                "Calories": "300 kcal",
+                                "Protein": "10g",
+                                "Fat": "16g",
+                                "Carbs": "30g"
+                              },
+                              time: "10 mins",
                               cardWidth: screenWidth * 0.45,
                               cardHeight: screenHeight * 0.22,
                             ),
@@ -301,6 +345,115 @@ class HomePage extends StatelessWidget {
           );
         }
       },
+    );
+  }
+  // Recipe Card
+  static Widget _recipeCard(
+    BuildContext context, {
+    required String title,
+    required String author,
+    required String rating,
+    required String imageUrl,
+    required List<String> ingredients,
+    required List<String> steps,
+    required Map<String, String> nutrition,
+    required String time,
+    required double cardWidth,
+    required double cardHeight,
+  }) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RecipeOverviewScreen(
+            title: title,
+            imageUrl: imageUrl,
+            details: "$rating★ · Quick Meal",
+            description:
+                "A quick, simple, and delicious dish to make anytime!",
+            ingredients: ingredients,
+            steps: steps,
+            nutrition: nutrition,
+            time: time,
+          ),
+        ),
+      ),
+      child: Container(
+        width: cardWidth,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 5,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(15)),
+              child: Image.network(
+                imageUrl,
+                height: cardHeight * 0.5,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  height: cardHeight * 0.5,
+                  color: Colors.grey[300],
+                  alignment: Alignment.center,
+                  child: const Icon(Icons.image_not_supported,
+                      color: Colors.grey, size: 30),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'League Spartan',
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    author,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                      fontFamily: 'League Spartan',
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.amber, size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        rating,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF391713),
+                          fontFamily: 'League Spartan',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -446,101 +599,6 @@ class HomePage extends StatelessWidget {
                 fontSize: 12,
                 color: Colors.grey,
                 fontFamily: 'League Spartan',
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Recipe Card
-  static Widget _recipeCard(
-    BuildContext context, {
-    required String title,
-    required String author,
-    required String rating,
-    required String imageUrl,
-    required List<String> steps,
-    required double cardWidth,
-    required double cardHeight,
-  }) {
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => CookingAssistantScreen(recipeTitle: title, steps: steps),
-        ),
-      ),
-      child: Container(
-        width: cardWidth,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 5,
-              spreadRadius: 1,
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-              child: Image.network(
-                imageUrl,
-                height: cardHeight * 0.5,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  height: cardHeight * 0.5,
-                  color: Colors.grey[300],
-                  alignment: Alignment.center,
-                  child: const Icon(Icons.image_not_supported, color: Colors.grey, size: 30),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'League Spartan',
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    author,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                      fontFamily: 'League Spartan',
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 14),
-                      const SizedBox(width: 4),
-                      Text(
-                        rating,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF391713),
-                          fontFamily: 'League Spartan',
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ),
             ),
           ],
