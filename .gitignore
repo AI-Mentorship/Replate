@@ -1,0 +1,30 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Environment files
+.env
+backend/.env
+
+# FastAPI / misc
+*.db
+*.sqlite3
+
+# Flutter / Dart
+flutter-chatbot/.dart_tool/
+flutter-chatbot/build/
+flutter-chatbot/.flutter-plugins*
+flutter-chatbot/.packages
+flutter-chatbot/ios/Pods/
+flutter-chatbot/android/.gradle/
+flutter-chatbot/android/app/build/
+pubspec.lock
+
+# macOS / VS Code
+.DS_Store
+.vscode/
