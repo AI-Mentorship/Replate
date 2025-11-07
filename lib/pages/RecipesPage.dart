@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert';
+import '../data/SupabaseRepo.dart';
 import '../widgets/BottomNavBar.dart';
 import '../screens/RecipeOverviewScreen.dart';
 
@@ -10,19 +13,36 @@ class RecipesPage extends StatefulWidget {
 }
 
 class _RecipesPageState extends State<RecipesPage> {
-  String selectedTab = "Saved"; // default tab
+  String selectedTab = "Discover";
+  final repo = SupabaseRepo();
+  late Future<List<dynamic>> _recipesFuture;
 
-  // Mock backend function
+  @override
+  void initState() {
+    super.initState();
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    _recipesFuture = repo.fetchRecipes(userId ?? '');
+  }
+
   Future<Map<String, dynamic>> _mockParseRecipe(String url) async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
     return {
-      "title": "Imported Recipe from $url",
+      "title": "Shrimp Pasta",
+      "description": "Creamy garlic shrimp pasta with herbs and parmesan.",
       "steps": [
-        "Step 1: Preheat your pan or oven.",
-        "Step 2: Prepare ingredients as listed.",
-        "Step 3: Follow the cooking instructions from the video.",
-        "Step 4: Serve and enjoy!",
+        "Boil pasta until al dente.",
+        "Sauté shrimp in butter and garlic.",
+        "Add cream and parmesan, stir until thickened.",
+        "Toss pasta with sauce and garnish with parsley."
       ],
+      "ingredients": [
+        "200g spaghetti",
+        "250g shrimp",
+        "3 cloves garlic",
+        "1 cup heavy cream",
+        "2 tbsp butter",
+        "Parmesan and parsley"
+      ]
     };
   }
 
@@ -33,14 +53,11 @@ class _RecipesPageState extends State<RecipesPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top Bar
-            SizedBox(
-              width: double.infinity,
+            const SizedBox(
               height: 64,
-              child: const Center(
+              child: Center(
                 child: Text(
                   'Recipes',
-                  textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 26,
@@ -50,8 +67,6 @@ class _RecipesPageState extends State<RecipesPage> {
                 ),
               ),
             ),
-
-            // White Section
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -66,21 +81,11 @@ class _RecipesPageState extends State<RecipesPage> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Tabs
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildTabButton("Discover"),
-                          _buildTabButton("Saved"),
-                          _buildTabButton("Upload"),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
+                      _buildTabRow(context),
+                      const SizedBox(height: 16),
                       Divider(color: Colors.grey.shade300, thickness: 1),
-
-                      // Tab content
+                      const SizedBox(height: 10),
                       Expanded(child: _buildTabContent()),
                     ],
                   ),
@@ -94,19 +99,29 @@ class _RecipesPageState extends State<RecipesPage> {
     );
   }
 
-  // Tab Buttons
-  Widget _buildTabButton(String label) {
-    final bool isSelected = selectedTab == label;
+  Widget _buildTabRow(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildTabButton("Discover", screenWidth),
+        _buildTabButton("Saved", screenWidth),
+        _buildTabButton("Upload", screenWidth),
+      ],
+    );
+  }
+
+  Widget _buildTabButton(String label, double screenWidth) {
+    final bool isSelected = selectedTab == label;
     return GestureDetector(
       onTap: () => setState(() => selectedTab = label),
       child: Container(
-        width: screenWidth / 3.5,
-        padding: EdgeInsets.symmetric(vertical: screenWidth * 0.025),
+        width: screenWidth / 3.8,
+        padding: EdgeInsets.symmetric(vertical: screenWidth * 0.02),
         decoration: BoxDecoration(
           color:
               isSelected ? const Color(0xFFE95322) : const Color(0xFFFFE6DC),
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(22),
         ),
         alignment: Alignment.center,
         child: Text(
@@ -115,304 +130,389 @@ class _RecipesPageState extends State<RecipesPage> {
             color: isSelected ? Colors.white : const Color(0xFF391713),
             fontFamily: 'League Spartan',
             fontWeight: FontWeight.w600,
-            fontSize: screenWidth * 0.04,
+            fontSize: screenWidth * 0.038,
           ),
         ),
       ),
     );
   }
 
-  // Tab content
   Widget _buildTabContent() {
     if (selectedTab == "Discover") {
-      return const Center(
-        child: Text(
-          "Browse trending dishes and new ideas!",
+      return _buildDiscoverTab();
+    } else if (selectedTab == "Upload") {
+      return _buildUploadTab();
+    } else {
+      return _buildSavedTab();
+    }
+  }
+
+  Widget _buildDiscoverTab() {
+    final List<Map<String, dynamic>> recipes = [
+      {
+        "title": "Garlic Butter Shrimp",
+        "desc": "Juicy shrimp cooked in garlic butter and herbs.",
+        "icon": Icons.restaurant_menu,
+        "ingredients": [
+          "1 lb large shrimp, peeled and deveined",
+          "3 tbsp unsalted butter",
+          "4 cloves garlic, minced",
+          "1 tbsp lemon juice",
+          "Salt and black pepper to taste",
+          "Fresh parsley for garnish"
+        ],
+        "steps": [
+          "Melt butter in a skillet over medium heat.",
+          "Add minced garlic and sauté until fragrant.",
+          "Add shrimp, season with salt and pepper, and cook 2–3 minutes per side.",
+          "Drizzle with lemon juice, garnish with parsley, and serve immediately."
+        ],
+        "nutrition": {
+          "Calories": "320 kcal",
+          "Protein": "28g",
+          "Carbs": "3g",
+          "Fat": "20g"
+        },
+        "time": "15 min"
+      },
+      {
+        "title": "Spaghetti Pomodoro",
+        "desc": "Classic Italian tomato pasta with basil.",
+        "icon": Icons.local_dining,
+        "ingredients": [
+          "8 oz spaghetti",
+          "2 tbsp olive oil",
+          "3 cloves garlic, minced",
+          "2 cups crushed tomatoes",
+          "1/4 cup fresh basil leaves",
+          "Salt and pepper to taste",
+          "Parmesan for topping"
+        ],
+        "steps": [
+          "Cook spaghetti in salted boiling water until al dente.",
+          "In a pan, heat olive oil and sauté garlic until golden.",
+          "Add crushed tomatoes, season with salt and pepper, and simmer 10 minutes.",
+          "Toss cooked pasta in sauce, mix in basil, and top with parmesan."
+        ],
+        "nutrition": {
+          "Calories": "410 kcal",
+          "Protein": "13g",
+          "Carbs": "60g",
+          "Fat": "12g"
+        },
+        "time": "25 min"
+      },
+      {
+        "title": "Grilled Chicken Salad",
+        "desc": "Healthy chicken salad with crisp veggies.",
+        "icon": Icons.eco,
+        "ingredients": [
+          "1 boneless chicken breast",
+          "2 cups mixed greens",
+          "1/2 cucumber, sliced",
+          "1/2 cup cherry tomatoes, halved",
+          "2 tbsp olive oil",
+          "1 tbsp balsamic vinegar",
+          "Salt and pepper to taste"
+        ],
+        "steps": [
+          "Season chicken breast with salt and pepper, then grill until cooked through.",
+          "Let it rest, then slice into strips.",
+          "In a bowl, toss greens, cucumber, and tomatoes with olive oil and vinegar.",
+          "Top with sliced chicken and serve."
+        ],
+        "nutrition": {
+          "Calories": "350 kcal",
+          "Protein": "32g",
+          "Carbs": "9g",
+          "Fat": "20g"
+        },
+        "time": "20 min"
+      },
+      {
+        "title": "Beef Stir Fry",
+        "desc": "Savory beef and vegetables tossed in soy glaze.",
+        "icon": Icons.ramen_dining,
+        "ingredients": [
+          "1/2 lb flank steak, thinly sliced",
+          "1 cup broccoli florets",
+          "1 red bell pepper, sliced",
+          "2 tbsp soy sauce",
+          "1 tbsp oyster sauce",
+          "1 tbsp sesame oil",
+          "1 tsp cornstarch mixed with 2 tbsp water"
+        ],
+        "steps": [
+          "Heat sesame oil in a wok over high heat.",
+          "Add beef and stir-fry for 2–3 minutes until browned.",
+          "Add broccoli and bell pepper, cook for another 3–4 minutes.",
+          "Pour in soy and oyster sauces, add cornstarch slurry, and stir until thickened."
+        ],
+        "nutrition": {
+          "Calories": "420 kcal",
+          "Protein": "30g",
+          "Carbs": "15g",
+          "Fat": "26g"
+        },
+        "time": "25 min"
+      },
+    ];
+
+    return ListView.separated(
+      itemCount: recipes.length,
+      separatorBuilder: (_, __) =>
+          Divider(color: Colors.grey.shade300, thickness: 1),
+      itemBuilder: (context, i) {
+        final r = recipes[i];
+        return ListTile(
+          contentPadding: const EdgeInsets.symmetric(vertical: 6),
+          leading: CircleAvatar(
+            radius: 25,
+            backgroundColor: const Color(0xFFE95322).withOpacity(0.1),
+            child: Icon(r['icon'], color: const Color(0xFFE95322)),
+          ),
+          title: Text(
+            r['title'],
+            style: const TextStyle(
+              fontFamily: 'League Spartan',
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF391713),
+              fontSize: 17,
+            ),
+          ),
+          subtitle: Text(
+            r['desc'],
+            style: const TextStyle(
+              fontFamily: 'League Spartan',
+              color: Colors.grey,
+              fontSize: 14,
+            ),
+          ),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => RecipeOverviewScreen(
+                title: r['title'],
+                imageUrl: '',
+                description: r['desc'],
+                details: "${r['nutrition']?['Calories']}  ${r['time']}",
+                steps: List<String>.from(r['steps']),
+                ingredients: List<String>.from(r['ingredients']),
+                nutrition: Map<String, String>.from(r['nutrition']),
+                time: r['time'],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildUploadTab() {
+    final TextEditingController _urlController = TextEditingController();
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          "Paste a recipe link below:",
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Color(0xFF391713),
             fontFamily: 'League Spartan',
+            fontWeight: FontWeight.w600,
             fontSize: 16,
           ),
         ),
-      );
-    } else if (selectedTab == "Upload") {
-      final TextEditingController _urlController = TextEditingController();
-
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            "Paste a recipe link below:",
-            style: TextStyle(
-              color: Color(0xFF391713),
-              fontFamily: 'League Spartan',
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+        const SizedBox(height: 15),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: TextField(
+            controller: _urlController,
+            decoration: InputDecoration(
+              hintText: "https://example.com/recipe",
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              filled: true,
+              fillColor: Colors.white,
             ),
           ),
-          const SizedBox(height: 15),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: TextField(
-              controller: _urlController,
-              decoration: InputDecoration(
-                hintText: "https://example.com/recipe",
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                filled: true,
-                fillColor: Colors.white,
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () async {
-              final url = _urlController.text.trim();
-              if (url.isEmpty) return;
-
-              final recipe = await _mockParseRecipe(url);
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => RecipeOverviewScreen(
-                    title: recipe['title'],
-                    imageUrl:
-                        'https://images.unsplash.com/photo-1604908813191-fd9334a7e1d4?auto=format&fit=crop&w=600&q=60',
-                    description: 'Auto-generated recipe preview.',
-                    details: '500 Cal · 30 Min',
-                    steps: List<String>.from(recipe['steps']),
-                    ingredients: const [
-                      '1 tbsp oil',
-                      '2 onions',
-                      '500g chicken',
-                      '1 cup curry sauce'
-                    ],
-                    nutrition: const {
-                      'Calories': '500 kcal',
-                      'Protein': '35g',
-                      'Carbs': '40g',
-                      'Fat': '18g'
-                    },
-                    time: '30 min',
-                  ),
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE95322),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25)),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
-            ),
-            child: const Text(
-              "Generate Recipe",
-              style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'League Spartan',
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ],
-      );
-    } else {
-      // Saved Recipes Tab
-      return ListView(
-        children: const [
-          _RecipeItem(
-            imageUrl:
-                'https://images.unsplash.com/photo-1604908813191-fd9334a7e1d4?auto=format&fit=crop&w=600&q=60',
-            title: 'Chicken Curry',
-            details: '500 Cal · 30 Min',
-            steps: [
-              'Heat oil in a pan and sauté onions until golden.',
-              'Add ginger garlic paste and stir for 1 minute.',
-              'Add chicken and cook until lightly browned.',
-              'Pour in curry sauce and simmer for 20 minutes.',
-              'Serve hot with rice or naan.',
-            ],
-            ingredients: [
-              '1 tbsp oil',
-              '2 onions',
-              '500g chicken',
-              '1 cup curry sauce'
-            ],
-            nutrition: {
-              'Calories': '500 kcal',
-              'Protein': '35g',
-              'Carbs': '40g',
-              'Fat': '18g'
-            },
-            time: '30 min',
-          ),
-          _RecipeItem(
-            imageUrl:
-                'https://images.unsplash.com/photo-1601050690597-4fbdc41c69c4?auto=format&fit=crop&w=600&q=60',
-            title: 'Bean and Vegetable Burger',
-            details: '470 Cal · 20 Min',
-            steps: [
-              'Mash beans and mix with chopped veggies.',
-              'Add spices and breadcrumbs, form patties.',
-              'Grill each side for 3–4 minutes.',
-              'Serve on buns with toppings of choice.',
-            ],
-            ingredients: [
-              '1 can kidney beans',
-              '1 carrot (grated)',
-              '½ onion (chopped)',
-              '½ cup breadcrumbs'
-            ],
-            nutrition: {
-              'Calories': '470 kcal',
-              'Protein': '22g',
-              'Carbs': '50g',
-              'Fat': '15g'
-            },
-            time: '20 min',
-          ),
-          _RecipeItem(
-            imageUrl:
-                'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=60',
-            title: 'Coffee Latte',
-            details: '170 Cal · 10 Min',
-            steps: [
-              'Heat 200 ml of milk until steaming, not boiling.',
-              'Pull a single espresso shot into a cup.',
-              'Pour 50 ml of hot water over the grounds slowly.',
-              'Froth the milk to a silky microfoam.',
-              'Gently pour milk over espresso, then top with foam.',
-            ],
-            ingredients: [
-              '200 ml milk',
-              '1 espresso shot',
-              '50 ml hot water'
-            ],
-            nutrition: {
-              'Calories': '170 kcal',
-              'Protein': '8g',
-              'Carbs': '12g',
-              'Fat': '7g'
-            },
-            time: '10 min',
-          ),
-          _RecipeItem(
-            imageUrl:
-                'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=60',
-            title: 'Strawberry Cheesecake',
-            details: '150 Cal · 30 Min',
-            steps: [
-              'Crush biscuits and mix with melted butter.',
-              'Press mixture into pan and chill.',
-              'Blend cream cheese, sugar, and vanilla until smooth.',
-              'Add whipped cream and spread over crust.',
-              'Top with strawberry glaze and chill for 4 hours.',
-            ],
-            ingredients: [
-              '1 cup biscuits (crushed)',
-              '3 tbsp melted butter',
-              '250g cream cheese',
-              '½ cup sugar',
-              'Strawberry glaze'
-            ],
-            nutrition: {
-              'Calories': '150 kcal',
-              'Protein': '4g',
-              'Carbs': '18g',
-              'Fat': '7g'
-            },
-            time: '30 min',
-          ),
-        ],
-      );
-    }
-  }
-}
-
-class _RecipeItem extends StatelessWidget {
-  final String imageUrl;
-  final String title;
-  final String details;
-  final List<String> steps;
-  final List<String> ingredients;
-  final Map<String, String> nutrition;
-  final String time;
-
-  const _RecipeItem({
-    required this.imageUrl,
-    required this.title,
-    required this.details,
-    required this.steps,
-    required this.ingredients,
-    required this.nutrition,
-    required this.time,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          onTap: () {
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () async {
+            final recipe = await _mockParseRecipe(_urlController.text.trim());
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => RecipeOverviewScreen(
-                  title: title,
-                  imageUrl: imageUrl,
-                  details: details,
-                  description: "A delicious recipe for $title.",
-                  steps: steps,
-                  ingredients: ingredients,
-                  nutrition: nutrition,
-                  time: time,
+                  title: recipe['title'],
+                  imageUrl: '',
+                  description: recipe['description'],
+                  details: '650 Cal  25 Min',
+                  steps: List<String>.from(recipe['steps']),
+                  ingredients: List<String>.from(recipe['ingredients']),
+                  nutrition: const {
+                    'Calories': '650 kcal',
+                    'Protein': '45g',
+                    'Carbs': '55g',
+                    'Fat': '22g',
+                  },
+                  time: '25 min',
                 ),
               ),
             );
           },
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              imageUrl,
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: 60,
-                  height: 60,
-                  color: Colors.grey[300],
-                  alignment: Alignment.center,
-                  child: const Icon(Icons.image_not_supported,
-                      color: Colors.grey),
-                );
-              },
-            ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE95322),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
           ),
-          title: Text(
-            title,
-            style: const TextStyle(
-              color: Color(0xFF391713),
+          child: const Text(
+            "Generate Recipe",
+            style: TextStyle(
+              color: Colors.white,
               fontFamily: 'League Spartan',
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
           ),
-          subtitle: Text(
-            details,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontFamily: 'League Spartan',
-              fontSize: 14,
-            ),
-          ),
         ),
-        Divider(color: Colors.grey.shade300, thickness: 1),
       ],
+    );
+  }
+  Widget _buildSavedTab() {
+    return FutureBuilder<List<dynamic>>(
+      future: _recipesFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+              child: CircularProgressIndicator(color: Color(0xFFE95322)));
+        }
+        if (snapshot.hasError) {
+          return Center(
+              child: Text("Error loading recipes: ${snapshot.error}"));
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(
+            child: Text(
+              "No saved recipes yet.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF391713),
+                fontFamily: 'League Spartan',
+                fontSize: 16,
+              ),
+            ),
+          );
+        }
+
+        final recipes = snapshot.data!;
+        return ListView.separated(
+          itemCount: recipes.length,
+          separatorBuilder: (_, __) =>
+              Divider(color: Colors.grey.shade300, thickness: 1),
+          itemBuilder: (context, i) {
+            final recipe = recipes[i];
+
+            List<String> parseList(dynamic data) {
+              if (data == null) return [];
+              try {
+                if (data is List) return data.map((e) => e.toString()).toList();
+                if (data is String) {
+                  final decoded = jsonDecode(data);
+                  if (decoded is List) return decoded.map((e) => e.toString()).toList();
+                  if (decoded is Map) return decoded.values.map((e) => e.toString()).toList();
+                }
+                if (data is Map) return data.values.map((e) => e.toString()).toList();
+              } catch (_) {}
+              return data
+                  .toString()
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList();
+            }
+
+            final ingredients = parseList(recipe['ingredients']);
+            final steps = parseList(recipe['steps']);
+
+            Map<String, String> nutrition = {
+              'Calories': '—',
+              'Protein': '—',
+              'Carbs': '—',
+              'Fat': '—',
+            };
+            if (recipe['nutrition'] != null) {
+              try {
+                if (recipe['nutrition'] is Map) {
+                  nutrition = (recipe['nutrition'] as Map)
+                      .map((k, v) => MapEntry(k.toString(), v.toString()));
+                } else if (recipe['nutrition'] is String) {
+                  final parsed = jsonDecode(recipe['nutrition']);
+                  if (parsed is Map) {
+                    nutrition = parsed.map((k, v) => MapEntry(k.toString(), v.toString()));
+                  }
+                }
+              } catch (_) {}
+            }
+
+            final cal = nutrition['Calories'] ?? '';
+            final time = (recipe['time'] ?? '').toString();
+            final details =
+                (cal.isNotEmpty && cal != '—' && time.isNotEmpty && time != '—')
+                    ? "$cal  $time"
+                    : null; 
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: ListTile(
+                leading: CircleAvatar(
+                  radius: 25,
+                  backgroundColor: const Color(0xFFE95322).withOpacity(0.1),
+                  child: const Icon(Icons.bookmark, color: Color(0xFFE95322)),
+                ),
+                title: Text(
+                  recipe['title'] ?? 'Untitled',
+                  style: const TextStyle(
+                    fontFamily: 'League Spartan',
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF391713),
+                    fontSize: 17,
+                  ),
+                ),
+                subtitle: details != null
+                    ? Text(
+                        details,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontFamily: 'League Spartan',
+                          fontSize: 13,
+                        ),
+                      )
+                    : null,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => RecipeOverviewScreen(
+                      title: recipe['title'] ?? 'Untitled',
+                      imageUrl: '',
+                      description:
+                          recipe['description'] ?? 'A saved recipe.',
+                      details: details ?? '',
+                      steps: steps,
+                      ingredients: ingredients.isNotEmpty
+                          ? ingredients
+                          : ['No ingredients available'],
+                      nutrition: nutrition,
+                      time: time,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

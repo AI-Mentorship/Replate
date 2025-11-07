@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'CookingAssistantScreen.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import '../data/SupabaseRepo.dart';
 
 class RecipeOverviewScreen extends StatefulWidget {
   final String title;
   final String imageUrl;
   final String details;
   final String description;
-  final List<String> steps;
-  final List<String> ingredients;
+  final List<dynamic> steps;
+  final List<dynamic> ingredients;
   final Map<String, String> nutrition;
   final String time;
 
@@ -30,31 +29,53 @@ class RecipeOverviewScreen extends StatefulWidget {
 }
 
 class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
-  final TextEditingController _subInputController = TextEditingController();
-  String? chatbotReply;
+  final repo = SupabaseRepo();
 
-  Future<void> sendToChatbot(String question) async {
+  bool _loadingSubs = true;
+  List<Map<String, dynamic>> _subs = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSubstitutions();
+  }
+
+  Future<void> _loadSubstitutions() async {
     try {
-      final response = await http.post(
-        Uri.parse("https://your-backend-url.com/chatbot/substitution"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"message": question}),
-      );
-      final reply = jsonDecode(response.body)["reply"];
-      setState(() => chatbotReply = reply);
+      final rows = await repo.fetchSubstitutions();
+      setState(() {
+        _subs = rows.cast<Map<String, dynamic>>();
+        _loadingSubs = false;
+      });
     } catch (e) {
-      setState(() => chatbotReply =
-          "Sorry, couldn’t connect to the chatbot right now.");
+      debugPrint('Error loading substitutions: $e');
+      setState(() => _loadingSubs = false);
     }
+  }
+
+  List<String> _formatIngredients(List<dynamic> ingredients) {
+    if (ingredients.isEmpty) return ["No ingredients listed."];
+    final joined = ingredients.join(',');
+    return joined
+        .replaceAll('[', '')
+        .replaceAll(']', '')
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final formattedIngredients = _formatIngredients(widget.ingredients);
+    final formattedSteps = _formatIngredients(widget.steps);
+
     return Scaffold(
       backgroundColor: const Color(0xFFE0B03A),
       body: SafeArea(
         child: Column(
           children: [
+            // Header
             SizedBox(
               width: double.infinity,
               height: 64,
@@ -63,14 +84,17 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: Colors.white, size: 28),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 28,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
                   const Center(
                     child: Text(
-                      "Recipe Overview",
+                      'Recipe Overview',
                       style: TextStyle(
                         fontFamily: 'League Spartan',
                         fontSize: 24,
@@ -83,7 +107,7 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
               ),
             ),
 
-            // main content
+            // Content
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -106,8 +130,16 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
                           width: double.infinity,
                           height: 220,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stack) =>
-                              Container(height: 220, color: Colors.grey[300]),
+                          errorBuilder: (context, _, __) => Container(
+                            height: 220,
+                            color: Colors.grey[300],
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              Icons.image_not_supported,
+                              size: 42,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -122,14 +154,18 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        "${widget.time} • ${widget.details}",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                          fontFamily: 'League Spartan',
+                      if (widget.time.isNotEmpty || widget.details.isNotEmpty)
+                        Text(
+                          [
+                            if (widget.time.isNotEmpty) widget.time,
+                            if (widget.details.isNotEmpty) widget.details,
+                          ].join("  "), 
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                            fontFamily: 'League Spartan',
+                          ),
                         ),
-                      ),
                       const SizedBox(height: 16),
                       Text(
                         widget.description,
@@ -151,7 +187,7 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      ...widget.ingredients.map(
+                      ...formattedIngredients.map(
                         (i) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 3),
                           child: Text(
@@ -175,34 +211,41 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          onPressed: () {
-                            showModalBottomSheet(
-                              isScrollControlled: true,
-                              context: context,
-                              backgroundColor: Colors.white,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(25),
-                                ),
-                              ),
-                              builder: (_) => _SubstitutionSheet(
-                                ingredients: widget.ingredients,
-                                subInputController: _subInputController,
-                                chatbotReply: chatbotReply,
-                                onSubmit: (query) async {
-                                  await sendToChatbot(query);
+                          onPressed: _loadingSubs
+                              ? null
+                              : () {
+                                  showModalBottomSheet(
+                                    isScrollControlled: true,
+                                    context: context,
+                                    backgroundColor: Colors.white,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(25),
+                                      ),
+                                    ),
+                                    builder: (_) => _SubstitutionSheet(
+                                      ingredients: formattedIngredients,
+                                      substitutions: _subs,
+                                    ),
+                                  );
                                 },
-                              ),
-                            );
-                          },
-                          child: const Text(
-                            "Find Substitutions",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'League Spartan',
-                              fontSize: 18,
-                            ),
-                          ),
+                          child: _loadingSubs
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  "Find Substitutions",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'League Spartan',
+                                    fontSize: 18,
+                                  ),
+                                ),
                         ),
                       ),
 
@@ -228,8 +271,8 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
                               ),
                               const SizedBox(height: 8),
                               ...widget.nutrition.entries.map(
-                                (entry) => Text(
-                                  "${entry.key}: ${entry.value}",
+                                (e) => Text(
+                                  "${e.key}: ${e.value}",
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontFamily: 'League Spartan',
@@ -247,6 +290,7 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
               ),
             ),
 
+            // Start Cooking button
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: SizedBox(
@@ -265,7 +309,7 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
                       MaterialPageRoute(
                         builder: (_) => CookingAssistantScreen(
                           recipeTitle: widget.title,
-                          steps: widget.steps,
+                          steps: formattedSteps,
                         ),
                       ),
                     );
@@ -288,30 +332,15 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
   }
 }
 
-class _SubstitutionSheet extends StatefulWidget {
+/// Bottom sheet: substitution suggestions
+class _SubstitutionSheet extends StatelessWidget {
   final List<String> ingredients;
-  final TextEditingController subInputController;
-  final String? chatbotReply;
-  final Future<void> Function(String) onSubmit;
+  final List<Map<String, dynamic>> substitutions;
 
   const _SubstitutionSheet({
     required this.ingredients,
-    required this.subInputController,
-    required this.chatbotReply,
-    required this.onSubmit,
+    required this.substitutions,
   });
-
-  @override
-  State<_SubstitutionSheet> createState() => _SubstitutionSheetState();
-}
-
-class _SubstitutionSheetState extends State<_SubstitutionSheet> {
-  final mockSubs = {
-    'oil': ['Butter', 'Avocado oil'],
-    'chicken': ['Tofu', 'Paneer', 'Mushrooms'],
-    'milk': ['Oat milk', 'Almond milk', 'Coconut milk'],
-    'onions': ['Shallots', 'Leeks'],
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -336,13 +365,11 @@ class _SubstitutionSheetState extends State<_SubstitutionSheet> {
             ),
             const SizedBox(height: 15),
 
-            // Auto Suggestions
-            ...widget.ingredients.map((item) {
-              final subs = mockSubs.entries
-                  .where((e) => item.toLowerCase().contains(e.key))
-                  .map((e) => e.value)
-                  .expand((e) => e)
-                  .toList();
+            ...ingredients.map((item) {
+              final matches = substitutions.where((s) {
+                final ing = (s['ingredient'] ?? '').toString().toLowerCase();
+                return ing.isNotEmpty && item.toLowerCase().contains(ing);
+              }).toList();
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -356,98 +383,42 @@ class _SubstitutionSheetState extends State<_SubstitutionSheet> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    if (subs.isNotEmpty)
-                      ...subs.map(
-                        (s) => Padding(
-                          padding: const EdgeInsets.only(left: 15, top: 3),
-                          child: Text(
-                            "→ $s",
-                            style: const TextStyle(color: Colors.grey),
-                          ),
+                    if (matches.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 15, top: 3),
+                        child: Text(
+                          "→ No live substitutions found",
+                          style: TextStyle(color: Colors.grey),
                         ),
                       ),
+                    ...matches.map((m) {
+                      final alt = (m['alt_name'] ?? '').toString();
+                      final delta =
+                          (m['nutrition_delta'] ?? 'similar nutrition')
+                              .toString();
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 15, top: 3),
+                        child: Text(
+                          "→ $alt ($delta)",
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                      );
+                    }),
                   ],
                 ),
               );
             }),
 
-            const Divider(thickness: 1, height: 30),
-
-            // Custom question input
-            const Center(
-              child: Text(
-                "Ask your own substitution question:",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Color(0xFF391713),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: TextField(
-                controller: widget.subInputController,
-                decoration: InputDecoration(
-                  hintText: "e.g. Can I use oat milk instead of regular milk?",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Center(
-              child: ElevatedButton(
-                onPressed: () async {
-                  final query = widget.subInputController.text.trim();
-                  if (query.isEmpty) return;
-                  await widget.onSubmit(query);
-                  FocusScope.of(context).unfocus();
-                  widget.subInputController.clear();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE95322),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
-                ),
-                child: const Text(
-                  "Submit Question",
+            if (ingredients.isEmpty)
+              const Center(
+                child: Text(
+                  "No ingredients listed.",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.grey,
                     fontFamily: 'League Spartan',
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-            ),
-            if (widget.chatbotReply != null) ...[
-              const SizedBox(height: 20),
-              const Text(
-                "Chatbot Reply:",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF391713),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                widget.chatbotReply!,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Colors.black87,
-                  height: 1.4,
-                ),
-              ),
-            ],
             const SizedBox(height: 25),
           ],
         ),

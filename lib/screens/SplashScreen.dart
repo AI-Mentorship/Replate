@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'WelcomeScreen.dart';
+import '../pages/HomePage.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -9,15 +11,28 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final supabase = Supabase.instance.client;
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2, milliseconds: 500), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-      );
-    });
+    _routeFromSplash();
+  }
+
+  Future<void> _routeFromSplash() async {
+    // small splash pause
+    await Future.delayed(const Duration(milliseconds: 1200));
+
+    final session = supabase.auth.currentSession;
+
+    if (!mounted) return;
+
+    if (session != null) {
+      // already signed in
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage()));
+    } else {
+      // not signed in yet
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const WelcomeScreen()));
+    }
   }
 
   @override
