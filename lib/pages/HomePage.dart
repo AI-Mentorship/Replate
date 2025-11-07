@@ -67,7 +67,10 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 25,
+                    vertical: 20,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -86,7 +89,8 @@ class HomePage extends StatelessWidget {
                       LayoutBuilder(
                         builder: (context, constraints) {
                           final totalPadding = constraints.maxWidth * 0.06;
-                          final cardWidth = (constraints.maxWidth - totalPadding) / 2;
+                          final cardWidth =
+                              (constraints.maxWidth - totalPadding) / 2;
                           final cardHeight = screenWidth * 0.45;
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -104,8 +108,7 @@ class HomePage extends StatelessWidget {
                                 child: _mealCard(
                                   title: "Grocery List",
                                   subtitle: "View or generate items",
-                                  imageUrl:
-                                      "https://images.unsplash.com/photo-1601050690597-02fae3f165a5?auto=format&fit=crop&w=400&q=80",
+                                  imageUrl: "",
                                   width: cardWidth,
                                   height: cardHeight,
                                 ),
@@ -131,14 +134,21 @@ class HomePage extends StatelessWidget {
                               elevation: 4,
                             ),
                             onPressed: () async {
-                              final imageFile = await CameraHelper.pickImageFromCamera();
+                              final imageFile =
+                                  await CameraHelper.pickImageFromCamera();
                               if (imageFile != null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("Photo captured successfully!")),
+                                  const SnackBar(
+                                    content: Text(
+                                      "Photo captured successfully!",
+                                    ),
+                                  ),
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("No photo captured.")),
+                                  const SnackBar(
+                                    content: Text("No photo captured."),
+                                  ),
                                 );
                               }
                             },
@@ -156,6 +166,7 @@ class HomePage extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 25),
+
                       // Quick Recipes
                       Text(
                         "Quick Recipes",
@@ -179,15 +190,14 @@ class HomePage extends StatelessWidget {
                               title: "Pasta Casera",
                               author: "By Troyan Smith",
                               rating: "4.7",
-                              imageUrl:
-                                  "https://upload.wikimedia.org/wikipedia/commons/b/bc/Spaghetti_aglio_e_olio_%28homemade%29.jpg",
+                              imageUrl: "",
                               ingredients: const [
                                 "Spaghetti",
                                 "Olive Oil",
                                 "Garlic",
                                 "Salt",
                                 "Parsley",
-                                "Parmesan"
+                                "Parmesan",
                               ],
                               steps: const [
                                 "Boil spaghetti until al dente.",
@@ -199,40 +209,9 @@ class HomePage extends StatelessWidget {
                                 "Calories": "420 kcal",
                                 "Protein": "12g",
                                 "Fat": "14g",
-                                "Carbs": "65g"
+                                "Carbs": "65g",
                               },
                               time: "15 mins",
-                              cardWidth: screenWidth * 0.45,
-                              cardHeight: screenHeight * 0.22,
-                            ),
-                            const SizedBox(width: 15),
-                            _recipeCard(
-                              context,
-                              title: "Pasta Carbonara",
-                              author: "By Niki Samantha",
-                              rating: "4.5",
-                              imageUrl:
-                                  "https://upload.wikimedia.org/wikipedia/commons/f/f3/Spaghetti_alla_Carbonara_%28cropped%29.jpg",
-                              ingredients: const [
-                                "Spaghetti",
-                                "Eggs",
-                                "Parmesan",
-                                "Pancetta",
-                                "Black Pepper"
-                              ],
-                              steps: const [
-                                "Cook spaghetti until al dente.",
-                                "Fry pancetta until crisp.",
-                                "Mix eggs with parmesan and pepper.",
-                                "Combine all and serve immediately.",
-                              ],
-                              nutrition: const {
-                                "Calories": "480 kcal",
-                                "Protein": "18g",
-                                "Fat": "20g",
-                                "Carbs": "55g"
-                              },
-                              time: "20 mins",
                               cardWidth: screenWidth * 0.45,
                               cardHeight: screenHeight * 0.22,
                             ),
@@ -242,18 +221,17 @@ class HomePage extends StatelessWidget {
                               title: "Avocado Toast",
                               author: "By Jamie Lynn",
                               rating: "4.8",
-                              imageUrl:
-                                  "https://upload.wikimedia.org/wikipedia/commons/4/4d/Avocado_toast_with_egg.jpg",
+                              imageUrl: "",
                               ingredients: const [
                                 "Bread",
                                 "Avocado",
                                 "Salt",
                                 "Lemon Juice",
                                 "Egg",
-                                "Olive Oil"
+                                "Olive Oil",
                               ],
                               steps: const [
-                                "Toast the bread to your liking.",
+                                "Toast bread to your liking.",
                                 "Mash ripe avocado with salt and lemon.",
                                 "Spread on toast, top with egg or chili flakes.",
                                 "Drizzle olive oil and enjoy.",
@@ -262,7 +240,7 @@ class HomePage extends StatelessWidget {
                                 "Calories": "300 kcal",
                                 "Protein": "10g",
                                 "Fat": "16g",
-                                "Carbs": "30g"
+                                "Carbs": "30g",
                               },
                               time: "10 mins",
                               cardWidth: screenWidth * 0.45,
@@ -283,6 +261,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  // SIDE MENU
   Drawer _buildSideMenu(BuildContext context) {
     return Drawer(
       backgroundColor: const Color(0xFFE95322),
@@ -296,7 +275,9 @@ class HomePage extends StatelessWidget {
                 children: const [
                   CircleAvatar(
                     radius: 25,
-                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=8'),
+                    backgroundImage: NetworkImage(
+                      'https://i.pravatar.cc/150?img=8',
+                    ),
                   ),
                   SizedBox(width: 15),
                   Text(
@@ -313,10 +294,20 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 30),
               _menuItem(context, Icons.home, "Home", const HomePage()),
               _menuItem(context, Icons.fastfood, "Pantry", const PantryPage()),
-              _menuItem(context, Icons.favorite, "Recipes", const RecipesPage()),
+              _menuItem(
+                context,
+                Icons.favorite,
+                "Recipes",
+                const RecipesPage(),
+              ),
               _menuItem(context, Icons.list_alt, "Grocery List", null),
               _menuItem(context, Icons.person, "Profile", const ProfilePage()),
-              _menuItem(context, Icons.settings, "Settings", const SettingsPage()),
+              _menuItem(
+                context,
+                Icons.settings,
+                "Settings",
+                const SettingsPage(),
+              ),
             ],
           ),
         ),
@@ -324,7 +315,12 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  static Widget _menuItem(BuildContext context, IconData icon, String title, Widget? page) {
+  static Widget _menuItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    Widget? page,
+  ) {
     return ListTile(
       leading: Icon(icon, color: Colors.white, size: 26),
       title: Text(
@@ -338,16 +334,20 @@ class HomePage extends StatelessWidget {
       onTap: () {
         Navigator.pop(context);
         if (page != null) {
-          Navigator.pushReplacement(context, createRoute(page, fromRight: true));
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$title page coming soon!')),
+          Navigator.pushReplacement(
+            context,
+            createRoute(page, fromRight: true),
           );
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('$title page coming soon!')));
         }
       },
     );
   }
-  // Recipe Card
+
+  // 🍝 Recipe Card with icon fallback
   static Widget _recipeCard(
     BuildContext context, {
     required String title,
@@ -369,8 +369,7 @@ class HomePage extends StatelessWidget {
             title: title,
             imageUrl: imageUrl,
             details: "$rating★ · Quick Meal",
-            description:
-                "A quick, simple, and delicious dish to make anytime!",
+            description: "A quick, simple, and delicious dish to make anytime!",
             ingredients: ingredients,
             steps: steps,
             nutrition: nutrition,
@@ -395,21 +394,19 @@ class HomePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(15)),
-              child: Image.network(
-                imageUrl,
-                height: cardHeight * 0.5,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  height: cardHeight * 0.5,
-                  color: Colors.grey[300],
-                  alignment: Alignment.center,
-                  child: const Icon(Icons.image_not_supported,
-                      color: Colors.grey, size: 30),
-                ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(15),
               ),
+              child: (imageUrl.isNotEmpty)
+                  ? Image.network(
+                      imageUrl,
+                      height: cardHeight * 0.5,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          _buildRecipeIcon(title, cardHeight),
+                    )
+                  : _buildRecipeIcon(title, cardHeight),
             ),
             Padding(
               padding: const EdgeInsets.all(10),
@@ -457,7 +454,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Grocery List Card
+  // 🍲 Grocery List Card with icon fallback
   static Widget _mealCard({
     required String title,
     required String subtitle,
@@ -487,20 +484,16 @@ class HomePage extends StatelessWidget {
               topLeft: Radius.circular(15),
               topRight: Radius.circular(15),
             ),
-            child: Image.network(
-              imageUrl,
-              height: height * 0.5,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: height * 0.5,
-                  color: Colors.grey[300],
-                  alignment: Alignment.center,
-                  child: const Icon(Icons.image_not_supported, color: Colors.grey, size: 30),
-                );
-              },
-            ),
+            child: (imageUrl.isNotEmpty)
+                ? Image.network(
+                    imageUrl,
+                    height: height * 0.5,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildRecipeIcon(title, height),
+                  )
+                : _buildRecipeIcon(title, height),
           ),
           const SizedBox(height: 5),
           Text(
@@ -524,10 +517,50 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Calorie Card
-  static Widget _calorieCard(BuildContext context, double width, double height) {
+  // 🍽️ Icon Fallback Helper
+  static Widget _buildRecipeIcon(String title, double height) {
+    final lower = title.toLowerCase();
+    IconData icon;
+
+    if (lower.contains('pasta'))
+      icon = Icons.restaurant_menu_rounded;
+    else if (lower.contains('toast'))
+      icon = Icons.breakfast_dining_rounded;
+    else if (lower.contains('salad'))
+      icon = Icons.eco_rounded;
+    else if (lower.contains('chicken'))
+      icon = Icons.set_meal_rounded;
+    else if (lower.contains('burger'))
+      icon = Icons.lunch_dining_rounded;
+    else if (lower.contains('coffee'))
+      icon = Icons.local_cafe_rounded;
+    else if (lower.contains('cake'))
+      icon = Icons.cake_rounded;
+    else
+      icon = Icons.fastfood_rounded;
+
+    return Container(
+      height: height * 0.5,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFE6A0),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+      ),
+      child: Icon(icon, color: Color(0xFFE95322), size: 60),
+    );
+  }
+
+  // 🍎 Calorie Card unchanged
+  static Widget _calorieCard(
+    BuildContext context,
+    double width,
+    double height,
+  ) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, createRoute(const ProfilePage(), fromRight: true)),
+      onTap: () => Navigator.push(
+        context,
+        createRoute(const ProfilePage(), fromRight: true),
+      ),
       child: Container(
         width: width,
         height: height,

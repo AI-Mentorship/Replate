@@ -43,8 +43,10 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
       final reply = jsonDecode(response.body)["reply"];
       setState(() => chatbotReply = reply);
     } catch (e) {
-      setState(() => chatbotReply =
-          "Sorry, couldn’t connect to the chatbot right now.");
+      setState(
+        () =>
+            chatbotReply = "Sorry, couldn’t connect to the chatbot right now.",
+      );
     }
   }
 
@@ -55,6 +57,7 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            // Header
             SizedBox(
               width: double.infinity,
               height: 64,
@@ -63,8 +66,11 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: Colors.white, size: 28),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 28,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -83,7 +89,7 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
               ),
             ),
 
-            // main content
+            // Main Content
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -99,16 +105,19 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // ✅ Updated Image with Icon Fallback
                       ClipRRect(
                         borderRadius: BorderRadius.circular(20),
-                        child: Image.network(
-                          widget.imageUrl,
-                          width: double.infinity,
-                          height: 220,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stack) =>
-                              Container(height: 220, color: Colors.grey[300]),
-                        ),
+                        child: (widget.imageUrl.isNotEmpty)
+                            ? Image.network(
+                                widget.imageUrl,
+                                width: double.infinity,
+                                height: 220,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stack) =>
+                                    _buildRecipeIcon(widget.title),
+                              )
+                            : _buildRecipeIcon(widget.title),
                       ),
                       const SizedBox(height: 20),
 
@@ -247,6 +256,7 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
               ),
             ),
 
+            // Start Cooking Button
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: SizedBox(
@@ -286,8 +296,41 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
       ),
     );
   }
+
+  // 🍴 Icon fallback helper for image header
+  Widget _buildRecipeIcon(String title) {
+    final lower = title.toLowerCase();
+    IconData icon;
+
+    if (lower.contains('chicken'))
+      icon = Icons.set_meal_rounded;
+    else if (lower.contains('burger'))
+      icon = Icons.lunch_dining_rounded;
+    else if (lower.contains('coffee'))
+      icon = Icons.local_cafe_rounded;
+    else if (lower.contains('cake') || lower.contains('dessert'))
+      icon = Icons.cake_rounded;
+    else if (lower.contains('salad'))
+      icon = Icons.eco_rounded;
+    else if (lower.contains('pasta'))
+      icon = Icons.restaurant_menu_rounded;
+    else
+      icon = Icons.fastfood_rounded;
+
+    return Container(
+      width: double.infinity,
+      height: 220,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFE6A0),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      alignment: Alignment.center,
+      child: Icon(icon, color: const Color(0xFFE95322), size: 80),
+    );
+  }
 }
 
+// 🧂 Substitution Sheet (unchanged)
 class _SubstitutionSheet extends StatefulWidget {
   final List<String> ingredients;
   final TextEditingController subInputController;
@@ -415,8 +458,10 @@ class _SubstitutionSheetState extends State<_SubstitutionSheet> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 25,
+                    vertical: 12,
+                  ),
                 ),
                 child: const Text(
                   "Submit Question",

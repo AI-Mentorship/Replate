@@ -63,8 +63,10 @@ class _RecipesPageState extends State<RecipesPage> {
                   ),
                 ),
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 25,
+                    vertical: 25,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -104,8 +106,7 @@ class _RecipesPageState extends State<RecipesPage> {
         width: screenWidth / 3.5,
         padding: EdgeInsets.symmetric(vertical: screenWidth * 0.025),
         decoration: BoxDecoration(
-          color:
-              isSelected ? const Color(0xFFE95322) : const Color(0xFFFFE6DC),
+          color: isSelected ? const Color(0xFFE95322) : const Color(0xFFFFE6DC),
           borderRadius: BorderRadius.circular(25),
         ),
         alignment: Alignment.center,
@@ -159,7 +160,8 @@ class _RecipesPageState extends State<RecipesPage> {
               decoration: InputDecoration(
                 hintText: "https://example.com/recipe",
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 filled: true,
                 fillColor: Colors.white,
               ),
@@ -178,8 +180,7 @@ class _RecipesPageState extends State<RecipesPage> {
                 MaterialPageRoute(
                   builder: (_) => RecipeOverviewScreen(
                     title: recipe['title'],
-                    imageUrl:
-                        'https://images.unsplash.com/photo-1604908813191-fd9334a7e1d4?auto=format&fit=crop&w=600&q=60',
+                    imageUrl: "",
                     description: 'Auto-generated recipe preview.',
                     details: '500 Cal · 30 Min',
                     steps: List<String>.from(recipe['steps']),
@@ -187,13 +188,13 @@ class _RecipesPageState extends State<RecipesPage> {
                       '1 tbsp oil',
                       '2 onions',
                       '500g chicken',
-                      '1 cup curry sauce'
+                      '1 cup curry sauce',
                     ],
                     nutrition: const {
                       'Calories': '500 kcal',
                       'Protein': '35g',
                       'Carbs': '40g',
-                      'Fat': '18g'
+                      'Fat': '18g',
                     },
                     time: '30 min',
                   ),
@@ -203,9 +204,9 @@ class _RecipesPageState extends State<RecipesPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFE95322),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25)),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                borderRadius: BorderRadius.circular(25),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
             ),
             child: const Text(
               "Generate Recipe",
@@ -224,8 +225,7 @@ class _RecipesPageState extends State<RecipesPage> {
       return ListView(
         children: const [
           _RecipeItem(
-            imageUrl:
-                'https://images.unsplash.com/photo-1604908813191-fd9334a7e1d4?auto=format&fit=crop&w=600&q=60',
+            imageUrl: "",
             title: 'Chicken Curry',
             details: '500 Cal · 30 Min',
             steps: [
@@ -239,19 +239,18 @@ class _RecipesPageState extends State<RecipesPage> {
               '1 tbsp oil',
               '2 onions',
               '500g chicken',
-              '1 cup curry sauce'
+              '1 cup curry sauce',
             ],
             nutrition: {
               'Calories': '500 kcal',
               'Protein': '35g',
               'Carbs': '40g',
-              'Fat': '18g'
+              'Fat': '18g',
             },
             time: '30 min',
           ),
           _RecipeItem(
-            imageUrl:
-                'https://images.unsplash.com/photo-1601050690597-4fbdc41c69c4?auto=format&fit=crop&w=600&q=60',
+            imageUrl: "",
             title: 'Bean and Vegetable Burger',
             details: '470 Cal · 20 Min',
             steps: [
@@ -264,19 +263,18 @@ class _RecipesPageState extends State<RecipesPage> {
               '1 can kidney beans',
               '1 carrot (grated)',
               '½ onion (chopped)',
-              '½ cup breadcrumbs'
+              '½ cup breadcrumbs',
             ],
             nutrition: {
               'Calories': '470 kcal',
               'Protein': '22g',
               'Carbs': '50g',
-              'Fat': '15g'
+              'Fat': '15g',
             },
             time: '20 min',
           ),
           _RecipeItem(
-            imageUrl:
-                'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=60',
+            imageUrl: "",
             title: 'Coffee Latte',
             details: '170 Cal · 10 Min',
             steps: [
@@ -286,22 +284,17 @@ class _RecipesPageState extends State<RecipesPage> {
               'Froth the milk to a silky microfoam.',
               'Gently pour milk over espresso, then top with foam.',
             ],
-            ingredients: [
-              '200 ml milk',
-              '1 espresso shot',
-              '50 ml hot water'
-            ],
+            ingredients: ['200 ml milk', '1 espresso shot', '50 ml hot water'],
             nutrition: {
               'Calories': '170 kcal',
               'Protein': '8g',
               'Carbs': '12g',
-              'Fat': '7g'
+              'Fat': '7g',
             },
             time: '10 min',
           ),
           _RecipeItem(
-            imageUrl:
-                'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=60',
+            imageUrl: "",
             title: 'Strawberry Cheesecake',
             details: '150 Cal · 30 Min',
             steps: [
@@ -316,13 +309,13 @@ class _RecipesPageState extends State<RecipesPage> {
               '3 tbsp melted butter',
               '250g cream cheese',
               '½ cup sugar',
-              'Strawberry glaze'
+              'Strawberry glaze',
             ],
             nutrition: {
               'Calories': '150 kcal',
               'Protein': '4g',
               'Carbs': '18g',
-              'Fat': '7g'
+              'Fat': '7g',
             },
             time: '30 min',
           ),
@@ -376,22 +369,16 @@ class _RecipeItem extends StatelessWidget {
           },
           leading: ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              imageUrl,
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: 60,
-                  height: 60,
-                  color: Colors.grey[300],
-                  alignment: Alignment.center,
-                  child: const Icon(Icons.image_not_supported,
-                      color: Colors.grey),
-                );
-              },
-            ),
+            child: (imageUrl.isNotEmpty)
+                ? Image.network(
+                    imageUrl,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildRecipeIcon(title),
+                  )
+                : _buildRecipeIcon(title),
           ),
           title: Text(
             title,
@@ -413,6 +400,38 @@ class _RecipeItem extends StatelessWidget {
         ),
         Divider(color: Colors.grey.shade300, thickness: 1),
       ],
+    );
+  }
+
+  // 🍴 Icon Fallback Helper
+  static Widget _buildRecipeIcon(String title) {
+    final lower = title.toLowerCase();
+    IconData icon;
+
+    if (lower.contains('chicken'))
+      icon = Icons.set_meal_rounded;
+    else if (lower.contains('burger'))
+      icon = Icons.lunch_dining_rounded;
+    else if (lower.contains('coffee'))
+      icon = Icons.local_cafe_rounded;
+    else if (lower.contains('cake') || lower.contains('dessert'))
+      icon = Icons.cake_rounded;
+    else if (lower.contains('salad'))
+      icon = Icons.eco_rounded;
+    else if (lower.contains('pasta'))
+      icon = Icons.restaurant_menu_rounded;
+    else
+      icon = Icons.fastfood_rounded;
+
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFE6A0),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      alignment: Alignment.center,
+      child: Icon(icon, color: const Color(0xFFE95322), size: 30),
     );
   }
 }
