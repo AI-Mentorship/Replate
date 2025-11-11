@@ -1,0 +1,9 @@
+torch
+torchvision
+ultralytics
+opencv-python-headless
+pillow
+tqdm
+clip
+fastapi
+uvicorn
