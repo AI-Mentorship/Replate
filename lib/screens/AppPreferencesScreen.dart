@@ -8,9 +8,7 @@ class AppPreferencesScreen extends StatefulWidget {
 }
 
 class _AppPreferencesScreenState extends State<AppPreferencesScreen> {
-  bool darkMode = false;
-  bool notifications = true;
-  String units = 'Metric';
+  String units = 'Imperial'; 
   String assistantMode = 'Voice-Guided';
 
   @override
@@ -37,41 +35,6 @@ class _AppPreferencesScreenState extends State<AppPreferencesScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          SwitchListTile(
-            title: const Text('Dark Mode'),
-            value: darkMode,
-            activeColor: const Color(0xFFE95322),
-            onChanged: (val) => setState(() => darkMode = val),
-          ),
-          SwitchListTile(
-            title: const Text('Enable Notifications'),
-            value: notifications,
-            activeColor: const Color(0xFFE95322),
-            onChanged: (val) => setState(() => notifications = val),
-          ),
-          const SizedBox(height: 15),
-          const Text(
-            'Measurement Units:',
-            style: TextStyle(
-              fontFamily: 'League Spartan',
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-              color: Color(0xFF391713),
-            ),
-          ),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<String>(
-            value: units,
-            items: const [
-              DropdownMenuItem(value: 'Metric', child: Text('Metric (kg, cm)')),
-              DropdownMenuItem(value: 'Imperial', child: Text('Imperial (lb, ft)')),
-            ],
-            onChanged: (val) => setState(() => units = val!),
-            decoration: InputDecoration(
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-          const SizedBox(height: 20),
           const Text(
             'AI Assistant Mode:',
             style: TextStyle(

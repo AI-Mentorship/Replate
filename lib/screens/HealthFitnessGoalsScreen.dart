@@ -9,9 +9,10 @@ class HealthFitnessGoalsScreen extends StatefulWidget {
 
 class _HealthFitnessGoalsScreenState extends State<HealthFitnessGoalsScreen> {
   final TextEditingController caloriesController = TextEditingController();
+  final TextEditingController currentWeightController = TextEditingController();
   final TextEditingController weightGoalController = TextEditingController();
+  final TextEditingController proteinGoalController = TextEditingController();
   String goalType = 'Maintain';
-  double activityLevel = 1.2;
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +80,25 @@ class _HealthFitnessGoalsScreenState extends State<HealthFitnessGoalsScreen> {
           ),
           const SizedBox(height: 20),
           const Text(
+            'Current Weight (lb):',
+            style: TextStyle(
+              fontFamily: 'League Spartan',
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: Color(0xFF391713),
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: currentWeightController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: 'e.g. 165 lb',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
             'Target Weight (lb):',
             style: TextStyle(
               fontFamily: 'League Spartan',
@@ -98,7 +118,7 @@ class _HealthFitnessGoalsScreenState extends State<HealthFitnessGoalsScreen> {
           ),
           const SizedBox(height: 20),
           const Text(
-            'Activity Level:',
+            'Protein Goal (g):',
             style: TextStyle(
               fontFamily: 'League Spartan',
               fontWeight: FontWeight.w600,
@@ -106,16 +126,12 @@ class _HealthFitnessGoalsScreenState extends State<HealthFitnessGoalsScreen> {
               color: Color(0xFF391713),
             ),
           ),
-          DropdownButtonFormField<double>(
-            value: activityLevel,
-            items: const [
-              DropdownMenuItem(value: 1.2, child: Text('Sedentary (little or no exercise)')),
-              DropdownMenuItem(value: 1.375, child: Text('Lightly Active (1–3 days/week)')),
-              DropdownMenuItem(value: 1.55, child: Text('Moderately Active (3–5 days/week)')),
-              DropdownMenuItem(value: 1.725, child: Text('Very Active (6–7 days/week)')),
-            ],
-            onChanged: (val) => setState(() => activityLevel = val!),
+          const SizedBox(height: 10),
+          TextField(
+            controller: proteinGoalController,
+            keyboardType: TextInputType.number,
             decoration: InputDecoration(
+              hintText: 'e.g. 120 g',
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),

@@ -37,7 +37,7 @@ class SettingsPage extends StatelessWidget {
             _settingsCard(
               context,
               title: 'Dietary Preferences',
-              subtitle: 'Allergies, diet types, and ingredient restrictions',
+              subtitle: 'Diet types, allergies, and custom restrictions',
               icon: Icons.shield_outlined,
               color: const Color(0xFF00C853),
               destination: const DietaryPreferencesScreen(),
@@ -46,7 +46,7 @@ class SettingsPage extends StatelessWidget {
             _settingsCard(
               context,
               title: 'Health and Fitness Goals',
-              subtitle: 'Calorie targets, weight goals, and activity level',
+              subtitle: 'Calorie, weight, and protein goals',
               icon: Icons.fitness_center_outlined,
               color: const Color(0xFF2979FF),
               destination: const HealthFitnessGoalsScreen(),
@@ -55,7 +55,7 @@ class SettingsPage extends StatelessWidget {
             _settingsCard(
               context,
               title: 'App Preferences',
-              subtitle: 'Units, notifications, and AI assistant mode',
+              subtitle: 'AI assistant mode',
               icon: Icons.settings_outlined,
               color: const Color(0xFFFF6D00),
               destination: const AppPreferencesScreen(),
