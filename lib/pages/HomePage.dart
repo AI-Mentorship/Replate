@@ -125,6 +125,10 @@ class _HomePageState extends State<HomePage> {
                 child: SingleChildScrollView(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 25,
+                    vertical: 20,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -145,6 +149,8 @@ class _HomePageState extends State<HomePage> {
                           final totalPadding = constraints.maxWidth * 0.06;
                           final cardWidth =
                               (constraints.maxWidth - totalPadding) / 2;
+                          final cardWidth =
+                              (constraints.maxWidth - totalPadding) / 2;
                           final cardHeight = screenWidth * 0.45;
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -160,8 +166,7 @@ class _HomePageState extends State<HomePage> {
                                 child: _mealCard(
                                   title: "Grocery List",
                                   subtitle: "View or generate items",
-                                  imageUrl:
-                                      "https://images.unsplash.com/photo-1601050690597-02fae3f165a5?auto=format&fit=crop&w=400&q=80",
+                                  imageUrl: "",
                                   width: cardWidth,
                                   height: cardHeight,
                                 ),
@@ -197,6 +202,23 @@ class _HomePageState extends State<HomePage> {
                                       : "No photo captured."),
                                 ),
                               );
+                              final imageFile =
+                                  await CameraHelper.pickImageFromCamera();
+                              if (imageFile != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Photo captured successfully!",
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("No photo captured."),
+                                  ),
+                                );
+                              }
                             },
                             child: Text(
                               "+ Scan Fridge",
@@ -212,7 +234,8 @@ class _HomePageState extends State<HomePage> {
                       ),
 
                       const SizedBox(height: 25),
-                      // Quick Recipes section
+
+                      // Quick Recipes
                       Text(
                         "Quick Recipes",
                         style: TextStyle(
@@ -235,15 +258,14 @@ class _HomePageState extends State<HomePage> {
                               title: "Pasta Casera",
                               author: "By Troyan Smith",
                               rating: "4.7",
-                              imageUrl:
-                                  "https://upload.wikimedia.org/wikipedia/commons/b/bc/Spaghetti_aglio_e_olio_%28homemade%29.jpg",
+                              imageUrl: "",
                               ingredients: const [
                                 "Spaghetti",
                                 "Olive Oil",
                                 "Garlic",
                                 "Salt",
                                 "Parsley",
-                                "Parmesan"
+                                "Parmesan",
                               ],
                               steps: const [
                                 "Boil spaghetti until al dente.",
@@ -255,7 +277,7 @@ class _HomePageState extends State<HomePage> {
                                 "Calories": "420 kcal",
                                 "Protein": "12g",
                                 "Fat": "14g",
-                                "Carbs": "65g"
+                                "Carbs": "65g",
                               },
                               time: "15 mins",
                               cardWidth: screenWidth * 0.45,
@@ -267,27 +289,26 @@ class _HomePageState extends State<HomePage> {
                               title: "Avocado Toast",
                               author: "By Jamie Lynn",
                               rating: "4.8",
-                              imageUrl:
-                                  "https://upload.wikimedia.org/wikipedia/commons/4/4d/Avocado_toast_with_egg.jpg",
+                              imageUrl: "",
                               ingredients: const [
                                 "Bread",
                                 "Avocado",
                                 "Salt",
                                 "Lemon Juice",
                                 "Egg",
-                                "Olive Oil"
+                                "Olive Oil",
                               ],
                               steps: const [
-                                "Toast the bread.",
-                                "Mash avocado with salt and lemon.",
-                                "Spread, top with egg/chili flakes.",
-                                "Drizzle oil and enjoy.",
+                                "Toast bread to your liking.",
+                                "Mash ripe avocado with salt and lemon.",
+                                "Spread on toast, top with egg or chili flakes.",
+                                "Drizzle olive oil and enjoy.",
                               ],
                               nutrition: const {
                                 "Calories": "300 kcal",
                                 "Protein": "10g",
                                 "Fat": "16g",
-                                "Carbs": "30g"
+                                "Carbs": "30g",
                               },
                               time: "10 mins",
                               cardWidth: screenWidth * 0.45,
@@ -308,6 +329,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // SIDE MENU
   Drawer _buildSideMenu(BuildContext context) {
     return Drawer(
       backgroundColor: const Color(0xFFE95322),
@@ -363,7 +385,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   static Widget _menuItem(
-      BuildContext context, IconData icon, String title, Widget? page) {
+    BuildContext context,
+    IconData icon,
+    String title,
+    Widget? page,
+  ) {
     return ListTile(
       leading: Icon(icon, color: Colors.white, size: 26),
       title: Text(
@@ -377,18 +403,20 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         Navigator.pop(context);
         if (page != null) {
-          Navigator.push(
-              context, createRoute(page, fromRight: true));
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$title page coming soon!')),
+          Navigator.pushReplacement(
+            context,
+            createRoute(page, fromRight: true),
           );
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('$title page coming soon!')));
         }
       },
     );
   }
-  // Cards & helpers 
 
+  // 🍝 Recipe Card with icon fallback
   static Widget _recipeCard(
     BuildContext context, {
     required String title,
@@ -435,21 +463,19 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(15)),
-              child: Image.network(
-                imageUrl,
-                height: cardHeight * 0.5,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  height: cardHeight * 0.5,
-                  color: Colors.grey[300],
-                  alignment: Alignment.center,
-                  child: const Icon(Icons.image_not_supported,
-                      color: Colors.grey, size: 30),
-                ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(15),
               ),
+              child: (imageUrl.isNotEmpty)
+                  ? Image.network(
+                      imageUrl,
+                      height: cardHeight * 0.5,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          _buildRecipeIcon(title, cardHeight),
+                    )
+                  : _buildRecipeIcon(title, cardHeight),
             ),
             Padding(
               padding: const EdgeInsets.all(10),
@@ -488,6 +514,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Grocery List Card
   static Widget _mealCard({
     required String title,
     required String subtitle,
@@ -513,21 +540,19 @@ class _HomePageState extends State<HomePage> {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(15),
-                topRight: Radius.circular(15)),
-            child: Image.network(
-              imageUrl,
-              height: height * 0.5,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                height: height * 0.5,
-                color: Colors.grey[300],
-                alignment: Alignment.center,
-                child: const Icon(Icons.image_not_supported,
-                    color: Colors.grey, size: 30),
-              ),
+              topLeft: Radius.circular(15),
+              topRight: Radius.circular(15),
             ),
+            child: (imageUrl.isNotEmpty)
+                ? Image.network(
+                    imageUrl,
+                    height: height * 0.5,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildRecipeIcon(title, height),
+                  )
+                : _buildRecipeIcon(title, height),
           ),
           const SizedBox(height: 5),
           Text(title,
@@ -545,6 +570,126 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // 🍽️ Icon Fallback Helper
+  static Widget _buildRecipeIcon(String title, double height) {
+    final lower = title.toLowerCase();
+    IconData icon;
+
+    if (lower.contains('pasta'))
+      icon = Icons.restaurant_menu_rounded;
+    else if (lower.contains('toast'))
+      icon = Icons.breakfast_dining_rounded;
+    else if (lower.contains('salad'))
+      icon = Icons.eco_rounded;
+    else if (lower.contains('chicken'))
+      icon = Icons.set_meal_rounded;
+    else if (lower.contains('burger'))
+      icon = Icons.lunch_dining_rounded;
+    else if (lower.contains('coffee'))
+      icon = Icons.local_cafe_rounded;
+    else if (lower.contains('cake'))
+      icon = Icons.cake_rounded;
+    else
+      icon = Icons.fastfood_rounded;
+
+    return Container(
+      height: height * 0.5,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFE6A0),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+      ),
+      child: Icon(icon, color: Color(0xFFE95322), size: 60),
+    );
+  }
+
+  // 🍎 Calorie Card unchanged
+  static Widget _calorieCard(
+    BuildContext context,
+    double width,
+    double height,
+  ) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        createRoute(const ProfilePage(), fromRight: true),
+      ),
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 6,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              height: height * 0.55,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFFE6DC),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
+                ),
+              ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "${CalorieData.current} / ${CalorieData.goal} kcal",
+                        style: const TextStyle(
+                          fontFamily: 'League Spartan',
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF391713),
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: LinearProgressIndicator(
+                          value: CalorieData.progress,
+                          backgroundColor: Colors.white,
+                          color: const Color(0xFFE95322),
+                          minHeight: 8,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 5),
+            const Text(
+              "Calorie Stats",
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'League Spartan',
+              ),
+            ),
+            const Text(
+              "Tap for details",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+                fontFamily: 'League Spartan',
+              ),
+            ),
+          ],
+        ),
+      ),
   Widget _calorieCard(BuildContext context, double width, double height) {
     return FutureBuilder<Map<String, dynamic>>(
       future: Future.wait([_userFuture, _todayNutriFuture]).then((values) {

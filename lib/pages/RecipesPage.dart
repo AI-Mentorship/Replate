@@ -78,8 +78,10 @@ class _RecipesPageState extends State<RecipesPage> {
                   ),
                 ),
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 25,
+                    vertical: 25,
+                  ),
                   child: Column(
                     children: [
                       _buildTabRow(context),
@@ -511,8 +513,71 @@ class _RecipesPageState extends State<RecipesPage> {
               ),
             );
           },
-        );
-      },
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: (imageUrl.isNotEmpty)
+                ? Image.network(
+                    imageUrl,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildRecipeIcon(title),
+                  )
+                : _buildRecipeIcon(title),
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFF391713),
+              fontFamily: 'League Spartan',
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+            ),
+          ),
+          subtitle: Text(
+            details,
+            style: const TextStyle(
+              color: Colors.grey,
+              fontFamily: 'League Spartan',
+              fontSize: 14,
+            ),
+          ),
+        ),
+        Divider(color: Colors.grey.shade300, thickness: 1),
+      ],
+    );
+  }
+
+  // 🍴 Icon Fallback Helper
+  static Widget _buildRecipeIcon(String title) {
+    final lower = title.toLowerCase();
+    IconData icon;
+
+    if (lower.contains('chicken'))
+      icon = Icons.set_meal_rounded;
+    else if (lower.contains('burger'))
+      icon = Icons.lunch_dining_rounded;
+    else if (lower.contains('coffee'))
+      icon = Icons.local_cafe_rounded;
+    else if (lower.contains('cake') || lower.contains('dessert'))
+      icon = Icons.cake_rounded;
+    else if (lower.contains('salad'))
+      icon = Icons.eco_rounded;
+    else if (lower.contains('pasta'))
+      icon = Icons.restaurant_menu_rounded;
+    else
+      icon = Icons.fastfood_rounded;
+
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFE6A0),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      alignment: Alignment.center,
+      child: Icon(icon, color: const Color(0xFFE95322), size: 30),
     );
   }
 }
