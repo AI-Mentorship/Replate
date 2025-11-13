@@ -76,7 +76,6 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
         child: Column(
           children: [
             // Header
-            // Header
             SizedBox(
               width: double.infinity,
               height: 64,
@@ -85,11 +84,6 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                        size: 28,
-                      ),
                       icon: const Icon(
                         Icons.arrow_back,
                         color: Colors.white,
@@ -114,6 +108,7 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
             ),
 
             // Content
+            // Main Content
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -129,15 +124,31 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ✅ Updated Image with Icon Fallback
+                      // Image with Icon Fallback
                       ClipRRect(
                         borderRadius: BorderRadius.circular(20),
-                        child: (widget.imageUrl.isNotEmpty)
+                        child: widget.imageUrl.isNotEmpty
                             ? Image.network(
                                 widget.imageUrl,
                                 width: double.infinity,
                                 height: 220,
                                 fit: BoxFit.cover,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Container(
+                                    width: double.infinity,
+                                    height: 220,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFE6A0),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Center(
+                                      child: CircularProgressIndicator(
+                                        color: Color(0xFFE95322),
+                                      ),
+                                    ),
+                                  );
+                                },
                                 errorBuilder: (context, error, stack) =>
                                     _buildRecipeIcon(widget.title),
                               )
@@ -291,6 +302,7 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
               ),
             ),
 
+            // Start Cooking button
             // Start Cooking Button
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -337,20 +349,21 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
     final lower = title.toLowerCase();
     IconData icon;
 
-    if (lower.contains('chicken'))
+    if (lower.contains('chicken')) {
       icon = Icons.set_meal_rounded;
-    else if (lower.contains('burger'))
+    } else if (lower.contains('burger')) {
       icon = Icons.lunch_dining_rounded;
-    else if (lower.contains('coffee'))
+    } else if (lower.contains('coffee')) {
       icon = Icons.local_cafe_rounded;
-    else if (lower.contains('cake') || lower.contains('dessert'))
+    } else if (lower.contains('cake') || lower.contains('dessert')) {
       icon = Icons.cake_rounded;
-    else if (lower.contains('salad'))
+    } else if (lower.contains('salad')) {
       icon = Icons.eco_rounded;
-    else if (lower.contains('pasta'))
+    } else if (lower.contains('pasta')) {
       icon = Icons.restaurant_menu_rounded;
-    else
+    } else {
       icon = Icons.fastfood_rounded;
+    }
 
     return Container(
       width: double.infinity,
@@ -365,8 +378,8 @@ class _RecipeOverviewScreenState extends State<RecipeOverviewScreen> {
   }
 }
 
-// 🧂 Substitution Sheet (unchanged)
-class _SubstitutionSheet extends StatefulWidget {
+// Bottom sheet: substitution suggestions
+class _SubstitutionSheet extends StatelessWidget {
   final List<String> ingredients;
   final List<Map<String, dynamic>> substitutions;
 
@@ -442,63 +455,14 @@ class _SubstitutionSheet extends StatefulWidget {
               );
             }),
 
-            const Divider(thickness: 1, height: 30),
+            if (ingredients.isEmpty)
+              const Center(
+                child: Text(
+                  "No ingredients listed.",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
 
-            // Custom question input
-            const Center(
-              child: Text(
-                "Ask your own substitution question:",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Color(0xFF391713),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: TextField(
-                controller: widget.subInputController,
-                decoration: InputDecoration(
-                  hintText: "e.g. Can I use oat milk instead of regular milk?",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Center(
-              child: ElevatedButton(
-                onPressed: () async {
-                  final query = widget.subInputController.text.trim();
-                  if (query.isEmpty) return;
-                  await widget.onSubmit(query);
-                  FocusScope.of(context).unfocus();
-                  widget.subInputController.clear();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE95322),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 25,
-                    vertical: 12,
-                  ),
-                ),
-                child: const Text(
-                  "Submit Question",
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontFamily: 'League Spartan',
-                  ),
-                ),
-              ),
             const SizedBox(height: 25),
           ],
         ),

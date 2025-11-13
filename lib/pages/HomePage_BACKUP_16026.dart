@@ -123,10 +123,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 25,
-                    vertical: 20,
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -190,14 +188,21 @@ class _HomePageState extends State<HomePage> {
                             onPressed: () async {
                               final imageFile =
                                   await CameraHelper.pickImageFromCamera();
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(imageFile != null
-                                      ? "Photo captured successfully!"
-                                      : "No photo captured."),
-                                ),
-                              );
+                              if (imageFile != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Photo captured successfully!",
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("No photo captured."),
+                                  ),
+                                );
+                              }
                             },
                             child: Text(
                               "+ Scan Fridge",
@@ -213,8 +218,7 @@ class _HomePageState extends State<HomePage> {
                       ),
 
                       const SizedBox(height: 25),
-
-                      // Quick Recipes
+                      // Quick Recipes section
                       Text(
                         "Quick Recipes",
                         style: TextStyle(
@@ -346,6 +350,26 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: const [
+                  CircleAvatar(
+                    radius: 25,
+                    backgroundImage: NetworkImage(
+                      'https://i.pravatar.cc/150?img=8',
+                    ),
+                  ),
+                  SizedBox(width: 15),
+                  Text(
+                    "<Name>",
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontFamily: 'League Spartan',
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 30),
                   _menuItem(context, Icons.home, "Home", const HomePage()),
@@ -357,6 +381,25 @@ class _HomePageState extends State<HomePage> {
                 ],
               );
             },
+              ),
+              const SizedBox(height: 30),
+              _menuItem(context, Icons.home, "Home", const HomePage()),
+              _menuItem(context, Icons.fastfood, "Pantry", const PantryPage()),
+              _menuItem(
+                context,
+                Icons.favorite,
+                "Recipes",
+                const RecipesPage(),
+              ),
+              _menuItem(context, Icons.list_alt, "Grocery List", null),
+              _menuItem(context, Icons.person, "Profile", const ProfilePage()),
+              _menuItem(
+                context,
+                Icons.settings,
+                "Settings",
+                const SettingsPage(),
+              ),
+            ],
           ),
         ),
       ),
@@ -364,11 +407,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   static Widget _menuItem(
-    BuildContext context,
-    IconData icon,
-    String title,
-    Widget? page,
-  ) {
+      BuildContext context, IconData icon, String title, Widget? page) {
     return ListTile(
       leading: Icon(icon, color: Colors.white, size: 26),
       title: Text(
@@ -382,17 +421,22 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         Navigator.pop(context);
         if (page != null) {
-          Navigator.push(context, createRoute(page, fromRight: true));
+          Navigator.push(
+              context, createRoute(page, fromRight: true));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('$title page coming soon!')),
           );
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('$title page coming soon!')));
         }
       },
     );
   }
+  // Cards & helpers 
 
-  // 🍝 Recipe Card with icon fallback
   static Widget _recipeCard(
     BuildContext context, {
     required String title,
@@ -439,29 +483,27 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(15),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(15)),
+              child: Image.network(
+                imageUrl,
+                height: cardHeight * 0.5,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  height: cardHeight * 0.5,
+                  color: Colors.grey[300],
+                  alignment: Alignment.center,
+                  child: const Icon(Icons.image_not_supported,
+                      color: Colors.grey, size: 30),
+                ),
               ),
-              child: imageUrl.isNotEmpty
+              child: (imageUrl.isNotEmpty)
                   ? Image.network(
                       imageUrl,
                       height: cardHeight * 0.5,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          height: cardHeight * 0.5,
-                          width: double.infinity,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFFE6A0),
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-                          ),
-                          child: const Center(
-                            child: CircularProgressIndicator(color: Color(0xFFE95322)),
-                          ),
-                        );
-                      },
                       errorBuilder: (context, error, stackTrace) =>
                           _buildRecipeIcon(title, cardHeight),
                     )
@@ -504,7 +546,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Grocery List Card
   static Widget _mealCard({
     required String title,
     required String subtitle,
@@ -530,29 +571,30 @@ class _HomePageState extends State<HomePage> {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(15),
+                topRight: Radius.circular(15)),
+            child: Image.network(
+              imageUrl,
+              height: height * 0.5,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                height: height * 0.5,
+                color: Colors.grey[300],
+                alignment: Alignment.center,
+                child: const Icon(Icons.image_not_supported,
+                    color: Colors.grey, size: 30),
+              ),
+            ),
               topLeft: Radius.circular(15),
               topRight: Radius.circular(15),
             ),
-            child: imageUrl.isNotEmpty
+            child: (imageUrl.isNotEmpty)
                 ? Image.network(
                     imageUrl,
                     height: height * 0.5,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        height: height * 0.5,
-                        width: double.infinity,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFFFE6A0),
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-                        ),
-                        child: const Center(
-                          child: CircularProgressIndicator(color: Color(0xFFE95322)),
-                        ),
-                      );
-                    },
                     errorBuilder: (context, error, stackTrace) =>
                         _buildRecipeIcon(title, height),
                   )
@@ -574,43 +616,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 🍽️ Icon Fallback Helper
-  static Widget _buildRecipeIcon(String title, double height) {
-    final lower = title.toLowerCase();
-    IconData icon;
-
-    if (lower.contains('pasta')) {
-      icon = Icons.restaurant_menu_rounded;
-    } else if (lower.contains('toast')) {
-      icon = Icons.breakfast_dining_rounded;
-    } else if (lower.contains('salad')) {
-      icon = Icons.eco_rounded;
-    } else if (lower.contains('chicken')) {
-      icon = Icons.set_meal_rounded;
-    } else if (lower.contains('burger')) {
-      icon = Icons.lunch_dining_rounded;
-    } else if (lower.contains('coffee')) {
-      icon = Icons.local_cafe_rounded;
-    } else if (lower.contains('cake')) {
-      icon = Icons.cake_rounded;
-    } else if (lower.contains('grocery') || lower.contains('list')) {
-      icon = Icons.shopping_cart_rounded;
-    } else {
-      icon = Icons.fastfood_rounded;
-    }
-
-    return Container(
-      height: height * 0.5,
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        color: Color(0xFFFFE6A0),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-      ),
-      child: Icon(icon, color: const Color(0xFFE95322), size: 60),
-    );
-  }
-
-  // 🍎 Calorie Card with real-time data from Supabase
   Widget _calorieCard(BuildContext context, double width, double height) {
     return FutureBuilder<Map<String, dynamic>>(
       future: Future.wait([_userFuture, _todayNutriFuture]).then((values) {
@@ -659,6 +664,61 @@ class _HomePageState extends State<HomePage> {
                     blurRadius: 6,
                     spreadRadius: 2)
               ],
+  // 🍽️ Icon Fallback Helper
+  static Widget _buildRecipeIcon(String title, double height) {
+    final lower = title.toLowerCase();
+    IconData icon;
+
+    if (lower.contains('pasta'))
+      icon = Icons.restaurant_menu_rounded;
+    else if (lower.contains('toast'))
+      icon = Icons.breakfast_dining_rounded;
+    else if (lower.contains('salad'))
+      icon = Icons.eco_rounded;
+    else if (lower.contains('chicken'))
+      icon = Icons.set_meal_rounded;
+    else if (lower.contains('burger'))
+      icon = Icons.lunch_dining_rounded;
+    else if (lower.contains('coffee'))
+      icon = Icons.local_cafe_rounded;
+    else if (lower.contains('cake'))
+      icon = Icons.cake_rounded;
+    else
+      icon = Icons.fastfood_rounded;
+
+    return Container(
+      height: height * 0.5,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFE6A0),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+      ),
+      child: Icon(icon, color: Color(0xFFE95322), size: 60),
+    );
+  }
+
+  // 🍎 Calorie Card unchanged
+  static Widget _calorieCard(
+    BuildContext context,
+    double width,
+    double height,
+  ) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        createRoute(const ProfilePage(), fromRight: true),
+      ),
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 6,
+              spreadRadius: 2,
             ),
             child: Column(
               children: [

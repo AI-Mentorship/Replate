@@ -121,9 +121,8 @@ class _RecipesPageState extends State<RecipesPage> {
         width: screenWidth / 3.8,
         padding: EdgeInsets.symmetric(vertical: screenWidth * 0.02),
         decoration: BoxDecoration(
-          color:
-              isSelected ? const Color(0xFFE95322) : const Color(0xFFFFE6DC),
-          borderRadius: BorderRadius.circular(22),
+          color: isSelected ? const Color(0xFFE95322) : const Color(0xFFFFE6DC),
+          borderRadius: BorderRadius.circular(25),
         ),
         alignment: Alignment.center,
         child: Text(
@@ -311,7 +310,7 @@ class _RecipesPageState extends State<RecipesPage> {
   }
 
   Widget _buildUploadTab() {
-    final TextEditingController _urlController = TextEditingController();
+    final TextEditingController urlController = TextEditingController();
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -329,11 +328,12 @@ class _RecipesPageState extends State<RecipesPage> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: TextField(
-            controller: _urlController,
+            controller: urlController,
             decoration: InputDecoration(
               hintText: "https://example.com/recipe",
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               filled: true,
               fillColor: Colors.white,
             ),
@@ -342,13 +342,19 @@ class _RecipesPageState extends State<RecipesPage> {
         const SizedBox(height: 20),
         ElevatedButton(
           onPressed: () async {
-            final recipe = await _mockParseRecipe(_urlController.text.trim());
+            final url = urlController.text.trim();
+            if (url.isEmpty) return;
+
+            final recipe = await _mockParseRecipe(url);
+
+            if (!context.mounted) return;
+
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => RecipeOverviewScreen(
                   title: recipe['title'],
-                  imageUrl: '',
+                  imageUrl: "",
                   description: recipe['description'],
                   details: '650 Cal  25 Min',
                   steps: List<String>.from(recipe['steps']),
@@ -366,8 +372,10 @@ class _RecipesPageState extends State<RecipesPage> {
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFE95322),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
           ),
           child: const Text(
             "Generate Recipe",
@@ -382,6 +390,7 @@ class _RecipesPageState extends State<RecipesPage> {
       ],
     );
   }
+
   Widget _buildSavedTab() {
     return FutureBuilder<List<dynamic>>(
       future: _recipesFuture,
@@ -513,39 +522,8 @@ class _RecipesPageState extends State<RecipesPage> {
               ),
             );
           },
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: (imageUrl.isNotEmpty)
-                ? Image.network(
-                    imageUrl,
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildRecipeIcon(title),
-                  )
-                : _buildRecipeIcon(title),
-          ),
-          title: Text(
-            title,
-            style: const TextStyle(
-              color: Color(0xFF391713),
-              fontFamily: 'League Spartan',
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-            ),
-          ),
-          subtitle: Text(
-            details,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontFamily: 'League Spartan',
-              fontSize: 14,
-            ),
-          ),
-        ),
-        Divider(color: Colors.grey.shade300, thickness: 1),
-      ],
+        );
+      },
     );
   }
 
@@ -554,20 +532,21 @@ class _RecipesPageState extends State<RecipesPage> {
     final lower = title.toLowerCase();
     IconData icon;
 
-    if (lower.contains('chicken'))
+    if (lower.contains('chicken')) {
       icon = Icons.set_meal_rounded;
-    else if (lower.contains('burger'))
+    } else if (lower.contains('burger')) {
       icon = Icons.lunch_dining_rounded;
-    else if (lower.contains('coffee'))
+    } else if (lower.contains('coffee')) {
       icon = Icons.local_cafe_rounded;
-    else if (lower.contains('cake') || lower.contains('dessert'))
+    } else if (lower.contains('cake') || lower.contains('dessert')) {
       icon = Icons.cake_rounded;
-    else if (lower.contains('salad'))
+    } else if (lower.contains('salad')) {
       icon = Icons.eco_rounded;
-    else if (lower.contains('pasta'))
+    } else if (lower.contains('pasta')) {
       icon = Icons.restaurant_menu_rounded;
-    else
+    } else {
       icon = Icons.fastfood_rounded;
+    }
 
     return Container(
       width: 60,
