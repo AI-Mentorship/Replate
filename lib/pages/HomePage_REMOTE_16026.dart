@@ -1,55 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'PantryPage.dart';
 import 'RecipesPage.dart';
 import 'SettingsPage.dart';
 import '../widgets/BottomNavBar.dart';
 import '../utils/PageTransition.dart';
+import '../data/CalorieData.dart';
 import '../pages/ProfilePage.dart';
 import '../screens/RecipeOverviewScreen.dart';
 import '../screens/GroceryListScreen.dart';
 import '../utils/CameraHelper.dart';
-import '../data/NutritionProvider.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  final nutrition = NutritionProvider();
-  final supabase = Supabase.instance.client;
-
-  late final String _uid;
-  late Future<Map<String, dynamic>> _userFuture;
-  late Future<Map<String, dynamic>> _todayNutriFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _uid = supabase.auth.currentUser?.id ?? '';
-    _userFuture = _loadUserRow();
-    _todayNutriFuture = nutrition.getTodayNutrition(_uid);
-  }
-
-  Future<Map<String, dynamic>> _loadUserRow() async {
-    final row = await supabase
-        .from('users')
-        .select('full_name, email, calorie_goal')
-        .eq('user_id', _uid)
-        .maybeSingle();
-
-    return {
-      'full_name': row?['full_name'] ??
-          supabase.auth.currentUser?.userMetadata?['full_name'] ??
-          supabase.auth.currentUser?.email ??
-          'Friend',
-      'calorie_goal': row?['calorie_goal'] ?? 2000,
-      'email': row?['email'] ?? supabase.auth.currentUser?.email,
-    };
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,49 +23,31 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header 
+            // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  FutureBuilder<Map<String, dynamic>>(
-                    future: _userFuture,
-                    builder: (context, snap) {
-                      if (snap.connectionState == ConnectionState.waiting) {
-                        return const Text(
-                          "Hi, ... 👋",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'League Spartan',
-                          ),
-                        );
-                      }
-
-                      final name = (snap.data?['full_name'] ??
-                              snap.data?['email'] ??
-                              'Friend')
-                          .toString();
-                      return Flexible(
-                        child: Text(
-                          "Hi, $name 👋",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: screenWidth * 0.08,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'League Spartan',
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      );
-                    },
+                  Flexible(
+                    child: Text(
+                      "Hi, <Name> 👋",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: screenWidth * 0.08,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'League Spartan',
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   Builder(
                     builder: (context) => IconButton(
-                      icon: Icon(Icons.menu,
-                          color: Colors.white, size: screenWidth * 0.08),
+                      icon: Icon(
+                        Icons.menu,
+                        color: Colors.white,
+                        size: screenWidth * 0.08,
+                      ),
                       onPressed: () => Scaffold.of(context).openDrawer(),
                     ),
                   ),
@@ -111,7 +55,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            // White sheet
+            // Expanded White Section
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -141,7 +85,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 15),
 
-                      // Grocery + Calorie cards
+                      // Grocery + Calorie Cards
                       LayoutBuilder(
                         builder: (context, constraints) {
                           final totalPadding = constraints.maxWidth * 0.06;
@@ -155,8 +99,10 @@ class _HomePageState extends State<HomePage> {
                                 onTap: () {
                                   Navigator.push(
                                     context,
-                                    createRoute(const GroceryListScreen(),
-                                        fromRight: true),
+                                    createRoute(
+                                      const GroceryListScreen(),
+                                      fromRight: true,
+                                    ),
                                   );
                                 },
                                 child: _mealCard(
@@ -174,7 +120,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 25),
 
-                      // Scan Fridge
+                      // Scan Fridge Button
                       Center(
                         child: SizedBox(
                           width: screenWidth * 0.75,
@@ -190,14 +136,21 @@ class _HomePageState extends State<HomePage> {
                             onPressed: () async {
                               final imageFile =
                                   await CameraHelper.pickImageFromCamera();
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(imageFile != null
-                                      ? "Photo captured successfully!"
-                                      : "No photo captured."),
-                                ),
-                              );
+                              if (imageFile != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Photo captured successfully!",
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("No photo captured."),
+                                  ),
+                                );
+                              }
                             },
                             child: Text(
                               "+ Scan Fridge",
@@ -315,48 +268,47 @@ class _HomePageState extends State<HomePage> {
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-          child: FutureBuilder<Map<String, dynamic>>(
-            future: _userFuture,
-            builder: (context, snap) {
-              final name =
-                  (snap.data?['full_name'] ?? snap.data?['email'] ?? 'Friend')
-                      .toString();
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const CircleAvatar(
-                        radius: 25,
-                        backgroundImage:
-                            NetworkImage('https://i.pravatar.cc/150?img=8'),
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Text(
-                          name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                            fontFamily: 'League Spartan',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: const [
+                  CircleAvatar(
+                    radius: 25,
+                    backgroundImage: NetworkImage(
+                      'https://i.pravatar.cc/150?img=8',
+                    ),
                   ),
-                  const SizedBox(height: 30),
-                  _menuItem(context, Icons.home, "Home", const HomePage()),
-                  _menuItem(context, Icons.fastfood, "Pantry", const PantryPage()),
-                  _menuItem(context, Icons.favorite, "Recipes", const RecipesPage()),
-                  _menuItem(context, Icons.list_alt, "Grocery List", const GroceryListScreen()),
-                  _menuItem(context, Icons.person, "Profile", const ProfilePage()),
-                  _menuItem(context, Icons.settings, "Settings", const SettingsPage()),
+                  SizedBox(width: 15),
+                  Text(
+                    "<Name>",
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontFamily: 'League Spartan',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
-              );
-            },
+              ),
+              const SizedBox(height: 30),
+              _menuItem(context, Icons.home, "Home", const HomePage()),
+              _menuItem(context, Icons.fastfood, "Pantry", const PantryPage()),
+              _menuItem(
+                context,
+                Icons.favorite,
+                "Recipes",
+                const RecipesPage(),
+              ),
+              _menuItem(context, Icons.list_alt, "Grocery List", null),
+              _menuItem(context, Icons.person, "Profile", const ProfilePage()),
+              _menuItem(
+                context,
+                Icons.settings,
+                "Settings",
+                const SettingsPage(),
+              ),
+            ],
           ),
         ),
       ),
@@ -382,11 +334,14 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         Navigator.pop(context);
         if (page != null) {
-          Navigator.push(context, createRoute(page, fromRight: true));
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$title page coming soon!')),
+          Navigator.pushReplacement(
+            context,
+            createRoute(page, fromRight: true),
           );
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('$title page coming soon!')));
         }
       },
     );
@@ -432,7 +387,7 @@ class _HomePageState extends State<HomePage> {
               color: Colors.grey.withOpacity(0.2),
               blurRadius: 5,
               spreadRadius: 1,
-            )
+            ),
           ],
         ),
         child: Column(
@@ -442,26 +397,12 @@ class _HomePageState extends State<HomePage> {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(15),
               ),
-              child: imageUrl.isNotEmpty
+              child: (imageUrl.isNotEmpty)
                   ? Image.network(
                       imageUrl,
                       height: cardHeight * 0.5,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          height: cardHeight * 0.5,
-                          width: double.infinity,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFFE6A0),
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-                          ),
-                          child: const Center(
-                            child: CircularProgressIndicator(color: Color(0xFFE95322)),
-                          ),
-                        );
-                      },
                       errorBuilder: (context, error, stackTrace) =>
                           _buildRecipeIcon(title, cardHeight),
                     )
@@ -472,27 +413,36 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'League Spartan')),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'League Spartan',
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(author,
-                      style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                          fontFamily: 'League Spartan')),
+                  Text(
+                    author,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                      fontFamily: 'League Spartan',
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       const Icon(Icons.star, color: Colors.amber, size: 14),
                       const SizedBox(width: 4),
-                      Text(rating,
-                          style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF391713),
-                              fontFamily: 'League Spartan')),
+                      Text(
+                        rating,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF391713),
+                          fontFamily: 'League Spartan',
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -504,7 +454,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Grocery List Card
+  // 🍲 Grocery List Card with icon fallback
   static Widget _mealCard({
     required String title,
     required String subtitle,
@@ -520,10 +470,11 @@ class _HomePageState extends State<HomePage> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 6,
-              spreadRadius: 2,
-              offset: const Offset(0, 3))
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 6,
+            spreadRadius: 2,
+            offset: const Offset(0, 3),
+          ),
         ],
       ),
       child: Column(
@@ -533,42 +484,34 @@ class _HomePageState extends State<HomePage> {
               topLeft: Radius.circular(15),
               topRight: Radius.circular(15),
             ),
-            child: imageUrl.isNotEmpty
+            child: (imageUrl.isNotEmpty)
                 ? Image.network(
                     imageUrl,
                     height: height * 0.5,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        height: height * 0.5,
-                        width: double.infinity,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFFFE6A0),
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-                        ),
-                        child: const Center(
-                          child: CircularProgressIndicator(color: Color(0xFFE95322)),
-                        ),
-                      );
-                    },
                     errorBuilder: (context, error, stackTrace) =>
                         _buildRecipeIcon(title, height),
                   )
                 : _buildRecipeIcon(title, height),
           ),
           const SizedBox(height: 5),
-          Text(title,
-              style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'League Spartan')),
-          Text(subtitle,
-              style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                  fontFamily: 'League Spartan')),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'League Spartan',
+            ),
+          ),
+          Text(
+            subtitle,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+              fontFamily: 'League Spartan',
+            ),
+          ),
         ],
       ),
     );
@@ -579,25 +522,22 @@ class _HomePageState extends State<HomePage> {
     final lower = title.toLowerCase();
     IconData icon;
 
-    if (lower.contains('pasta')) {
+    if (lower.contains('pasta'))
       icon = Icons.restaurant_menu_rounded;
-    } else if (lower.contains('toast')) {
+    else if (lower.contains('toast'))
       icon = Icons.breakfast_dining_rounded;
-    } else if (lower.contains('salad')) {
+    else if (lower.contains('salad'))
       icon = Icons.eco_rounded;
-    } else if (lower.contains('chicken')) {
+    else if (lower.contains('chicken'))
       icon = Icons.set_meal_rounded;
-    } else if (lower.contains('burger')) {
+    else if (lower.contains('burger'))
       icon = Icons.lunch_dining_rounded;
-    } else if (lower.contains('coffee')) {
+    else if (lower.contains('coffee'))
       icon = Icons.local_cafe_rounded;
-    } else if (lower.contains('cake')) {
+    else if (lower.contains('cake'))
       icon = Icons.cake_rounded;
-    } else if (lower.contains('grocery') || lower.contains('list')) {
-      icon = Icons.shopping_cart_rounded;
-    } else {
+    else
       icon = Icons.fastfood_rounded;
-    }
 
     return Container(
       height: height * 0.5,
@@ -606,121 +546,97 @@ class _HomePageState extends State<HomePage> {
         color: Color(0xFFFFE6A0),
         borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
       ),
-      child: Icon(icon, color: const Color(0xFFE95322), size: 60),
+      child: Icon(icon, color: Color(0xFFE95322), size: 60),
     );
   }
 
-  // 🍎 Calorie Card with real-time data from Supabase
-  Widget _calorieCard(BuildContext context, double width, double height) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: Future.wait([_userFuture, _todayNutriFuture]).then((values) {
-        final user = values[0];
-        final today = values[1];
-        return {
-          'goal': (user['calorie_goal'] ?? 2000) as int,
-          ...today,
-        };
-      }),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return SizedBox(
-            width: width,
-            height: height,
-            child: const Center(
-                child: CircularProgressIndicator(color: Color(0xFFE95322))),
-          );
-        }
-
-        final merged = snapshot.data ??
-            {
-              'goal': 2000,
-              'calories': 0,
-              'protein': 0,
-              'fat': 0,
-              'carbs': 0,
-              'fiber': 0
-            };
-        final goal = (merged['goal'] as num).toInt();
-        final cals = (merged['calories'] as num).toInt();
-        final progress = (cals / goal).clamp(0.0, 1.0);
-
-        return GestureDetector(
-          onTap: () =>
-              Navigator.push(context, createRoute(const ProfilePage(), fromRight: true)),
-          child: Container(
-            width: width,
-            height: height,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    blurRadius: 6,
-                    spreadRadius: 2)
-              ],
+  // 🍎 Calorie Card unchanged
+  static Widget _calorieCard(
+    BuildContext context,
+    double width,
+    double height,
+  ) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        createRoute(const ProfilePage(), fromRight: true),
+      ),
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 6,
+              spreadRadius: 2,
             ),
-            child: Column(
-              children: [
-                Container(
-                  height: height * 0.55,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFFE6DC),
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(15),
-                        topRight: Radius.circular(15)),
-                  ),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "$cals / $goal kcal",
-                            style: const TextStyle(
-                              fontFamily: 'League Spartan',
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF391713),
-                              fontSize: 15,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: LinearProgressIndicator(
-                              value: progress,
-                              backgroundColor: Colors.white,
-                              color: const Color(0xFFE95322),
-                              minHeight: 8,
-                            ),
-                          ),
-                        ],
+          ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              height: height * 0.55,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFFE6DC),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
+                ),
+              ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "${CalorieData.current} / ${CalorieData.goal} kcal",
+                        style: const TextStyle(
+                          fontFamily: 'League Spartan',
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF391713),
+                          fontSize: 15,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: LinearProgressIndicator(
+                          value: CalorieData.progress,
+                          backgroundColor: Colors.white,
+                          color: const Color(0xFFE95322),
+                          minHeight: 8,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 5),
-                const Text(
-                  "Calorie Stats",
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'League Spartan'),
-                ),
-                const Text(
-                  "Tap for details",
-                  style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                      fontFamily: 'League Spartan'),
-                ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 5),
+            const Text(
+              "Calorie Stats",
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'League Spartan',
+              ),
+            ),
+            const Text(
+              "Tap for details",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+                fontFamily: 'League Spartan',
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

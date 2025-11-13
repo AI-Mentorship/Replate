@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:replate/screens/LoginScreen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/BottomNavBar.dart';
 import '../utils/PageTransition.dart';
 import '../screens/DietaryPreferencesScreen.dart';
 import '../screens/HealthFitnessGoalsScreen.dart';
 import '../screens/AppPreferencesScreen.dart';
+import '../screens/LoginScreen.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -15,10 +18,7 @@ class SettingsPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFE95322)),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: false, 
         centerTitle: true,
         title: const Text(
           'Settings',
@@ -60,6 +60,35 @@ class SettingsPage extends StatelessWidget {
               color: const Color(0xFFFF6D00),
               destination: const AppPreferencesScreen(),
             ),
+            const Spacer(),
+            ElevatedButton.icon(
+              onPressed: () async {
+                await Supabase.instance.client.auth.signOut();
+                if (context.mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    createRoute(const LogInScreen(), fromRight: true),
+                    (route) => false,
+                  );
+                }
+              },
+              icon: const Icon(Icons.logout, color: Colors.white),
+              label: const Text(
+                'Sign Out',
+                style: TextStyle(
+                  fontFamily: 'League Spartan',
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE95322),
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -74,7 +103,7 @@ class SettingsPage extends StatelessWidget {
     required String subtitle,
     required IconData icon,
     required Color color,
-    Widget? destination, 
+    Widget? destination,
   }) {
     return GestureDetector(
       onTap: destination != null
